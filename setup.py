@@ -19,4 +19,5 @@ setup(name='buf',
       # TODO: license kwarg
       packages=find_packages(),
       install_requires=['docopt'],
-      entry_points = {"console_scripts" : ["buf=buf.main:main"]})
+      entry_points = {"console_scripts" : ["buf=buf.main:main"]},
+      include_package_data = True)
