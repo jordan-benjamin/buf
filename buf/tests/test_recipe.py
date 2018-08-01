@@ -27,7 +27,7 @@ class RecipeTest(TestCase):
             with mock.patch("buf.commands.recipe.print") as mock_print:
                 # Testing the code stops if no matching chemical
                 with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={}):
-                    recipe.Recipe("boop", ["300mM"], ["Salt"])
+                    recipe.make_safe_recipe("boop", ["300mM"], ["Salt"])
                     mock_exit.assert_called()
                     mock_print.assert_called()
 
@@ -36,7 +36,7 @@ class RecipeTest(TestCase):
 
                 # Testing the code doesn't stop if the chemicals do exist.
                 with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={"salt" : None}):
-                    recipe.Recipe("boop", ["300mM"], ["salt"])
+                    recipe.make_safe_recipe("boop", ["300mM"], ["salt"])
                     mock_exit.assert_not_called()
                     mock_print.assert_not_called()
 
@@ -47,7 +47,7 @@ class RecipeTest(TestCase):
                 with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={"salt" : None}):
                     # Testing valid units.
                     for unit in ["M", "L", "ug"]:
-                        recipe.Recipe("name", ["123" + unit], ["salt"])
+                        recipe.make_safe_recipe("name", ["123" + unit], ["salt"])
                         mock_print.assert_not_called()
                         mock_exit.assert_not_called()
                         mock_exit.reset_mock()
@@ -55,7 +55,7 @@ class RecipeTest(TestCase):
 
                     # Testing invalid units.
                     for unit in ["", "invalid", "inval1d_w1th_numb3rs"]:
-                        recipe.Recipe("name", ["123" + unit], ["salt"])
+                        recipe.make_safe_recipe("name", ["123" + unit], ["salt"])
                         mock_print.assert_called()
                         mock_exit.assert_called()
                         mock_exit.reset_mock()
@@ -68,7 +68,7 @@ class RecipeTest(TestCase):
 
                     # Testing valid quantities.
                     for quantity in ["100", "100.1", "0.1", ".1", "10."]:
-                        recipe.Recipe("name", [quantity + "M"], ["salt"])
+                        recipe.make_safe_recipe("name", [quantity + "M"], ["salt"])
                         mock_print.assert_not_called()
                         mock_exit.assert_not_called()
                         mock_exit.reset_mock()
@@ -77,7 +77,7 @@ class RecipeTest(TestCase):
                     # Testing invalid quantities.
                     # TODO: negative numbers and zero?
                     for quantity in [""]:
-                        recipe.Recipe("name", [quantity + "L"], ["salt"])
+                        recipe.make_safe_recipe("name", [quantity + "L"], ["salt"])
                         mock_print.assert_called()
                         mock_exit.assert_called()
                         mock_exit.reset_mock()

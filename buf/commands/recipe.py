@@ -23,34 +23,45 @@ valid_units = list(volume_units) + list(molarity_units) + list(mass_units) + ["%
 def recipe():
     pass
 
-class Recipe:
+def make_safe_recipe(name, concentrations, chemical_names, chemical_library = None, recipe_library = None):
+
+    if chemical_library == None:
+        chemical_library = chemical.load_chemicals()
+    if recipe_library == None:
+        recipe_library = load_recipes()
+
+    # TODO: check if name is blank? will docopt let that happen?
     # TODO: ensure that docopt with guarantee that the lengths of concentrations and chemical_names are the same.
+    if name in recipe_library:
+        print(f"Name collision: '{name}' already exists in chemical library.")
+        exit()
+
+    for concentration, chemical_name in zip(concentrations, chemical_names):
+        if chemical_name not in chemical_library:
+            # TODO: prompt user to add chemical.
+            print(f"Name not found: '{chemical_name}' not in chemical library.")
+            exit()
+
+        quantity, unit = split_concentration(concentration)
+
+        # TODO: accept blank unit, load from settings.
+        if unit not in valid_units:
+            # TODO: display all valid units?
+            print(f"Invalid unit: '{unit}' is not a valid unit.")
+            exit()
+
+        try:
+            float_quantity = float(quantity)
+        except:
+            # TODO: change this message to mention numbers?
+            print(f"Invalid quantity: '{quantity}' is not a valid quantity")
+            exit()
+
+    return Recipe(name, concentrations, chemical_names)
+
+class Recipe:
     def __init__(self, name, concentrations, chemical_names):
-        chemical_dict = chemical.load_chemicals()
 
-        for concentration, chemical_name in zip(concentrations, chemical_names):
-            if chemical_name not in chemical_dict:
-                # TODO: prompt user to add chemical.
-                print(f"Name not found: '{chemical_name}' not in chemical library.")
-                exit()
-
-            quantity, unit = split_concentration(concentration)
-
-            # TODO: accept blank unit, load from settings.
-            if unit not in valid_units:
-                # TODO: display all valid units?
-                print(f"Invalid unit: '{unit}' is not a valid unit.")
-                exit()
-
-            try:
-                float_quantity = float(quantity)
-            except:
-                # TODO: change this message to mention numbers?
-                print(f"Invalid quantity: '{quantity}' is not a valid quantity")
-                exit()
-
-        # TODO: any type checking for recipe name? Check if recipe already exists (do that first).
-        # TODO: check if name is blank? will docopt let that happen?
         self.name = name
         self.concentrations = concentrations
         self.chemical_names = chemical_names
@@ -86,7 +97,9 @@ def split_concentration(string):
 
 
 def load_recipes():
+    # TODO: what if someone manually mucks up the file? check for corruption?
     recipes = {}
+    chemical_library = chemical.load_chemicals()
 
     with open(recipe_library_file, "r") as file:
         for line in file:
@@ -101,20 +114,15 @@ def load_recipes():
                 concentrations.append(words[index])
                 chemical_names.append(words[index+1])
 
-            recipe = Recipe(name, concentrations, chemical_names)
+            recipe = make_safe_recipe(name, concentrations, chemical_names, chemical_library=chemical_library, recipe_library=recipes)
             recipes[name] = recipe
 
     return recipes
 
 
 def add_recipe(name, concentrations, chemical_names):
-    recipes = load_recipes()
-    if name in recipes:
-        # TODO: prompt user to edit/delete/rename entry.
-        print(f"Name collision: '{name}' already exists in recipe library.")
-        exit()
 
-    new_recipe = Recipe(name, concentrations, chemical_names)
+    new_recipe = make_safe_recipe(name, concentrations, chemical_names)
 
     with open(recipe_library_file, "a") as file:
         file.write(str(new_recipe) + "\n")
