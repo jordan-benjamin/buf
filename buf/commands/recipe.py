@@ -26,8 +26,12 @@ concentration_units = list(concentration_units_to_molar)
 # Casting a dictionary to a list returns a list of its keys.
 valid_units = volume_units + mass_units + concentration_units + ["%"]
 
-def recipe():
-    pass
+
+def recipe(options):
+    if options["-a"] == True:
+        add_recipe(options["<recipe_name>"], options["<concentration>"], options["<chemical_name>"])
+    elif options["<recipe_name>"]:
+        display_recipe_information(options["<recipe_name>"])
 
 def make_safe_recipe(name, concentrations, chemical_names, chemical_library = None, recipe_library = None):
 
@@ -65,6 +69,21 @@ def make_safe_recipe(name, concentrations, chemical_names, chemical_library = No
 
     return Recipe(name, concentrations, chemical_names)
 
+def display_recipe_information(recipe_name):
+    recipe_library = load_recipes()
+
+    if recipe_name not in recipe_library:
+        print(f"Invalid recipe name: '{recipe_name}' not in recipe library.")
+        exit()
+
+    recipe_object = recipe_library[recipe_name]
+
+    print(f"Recipe name: {recipe_object.name}")
+    print(f"Contents: {recipe_object.get_contents()}")
+
+
+
+
 class Recipe:
     def __init__(self, name, concentrations, chemical_names):
 
@@ -72,10 +91,15 @@ class Recipe:
         self.concentrations = concentrations
         self.chemical_names = chemical_names
 
-    def __str__(self):
-        string = self.name
+    # TODO: better way of getting rid of the initial space than slicing.
+    def get_contents(self):
+        string = ""
         for concentration, chemical_name in zip(self.concentrations, self.chemical_names):
             string += f" {concentration} {chemical_name}"
+        return string[1:]
+
+    def __str__(self):
+        string = self.name + " " + self.get_contents()
         return string
 
     # TODO: two recipes that have the same ingredients and concentrations, but in different orders, should be equal.
@@ -134,3 +158,7 @@ def add_recipe(name, concentrations, chemical_names):
 
     with open(recipe_library_file, "a") as file:
         file.write(str(new_recipe) + "\n")
+
+def reset():
+    with open(recipe_library_file, "w") as file:
+        pass

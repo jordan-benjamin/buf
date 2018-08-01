@@ -8,7 +8,7 @@
 import os
 chemical_library_file = os.path.join(os.path.dirname(__file__), "../library/chemicals.txt")
 
-from ..misc import confirm, list_print
+
 from sys import exit
 
 class Chemical:

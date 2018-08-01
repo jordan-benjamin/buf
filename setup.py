@@ -18,6 +18,6 @@ setup(name='buf',
       author_email='jordan@mindcharger.com',
       # TODO: license kwarg
       packages=find_packages(),
-      install_requires=['docopt'],
+      install_requires=['docopt', 'tabulate'],
       entry_points = {"console_scripts" : ["buf=buf.main:main"]},
       include_package_data = True)
