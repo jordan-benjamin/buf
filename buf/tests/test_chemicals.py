@@ -13,6 +13,7 @@ else:
     from buf.commands import chemical
 
 class ChemicalTest(TestCase):
+    # TODO: change test to mock sys.exit and assert called, instead of the try/except block.
     def test_molar_mass_check(self):
             with mock.patch("buf.commands.chemical.print") as mock_print:
                 try:
@@ -51,6 +52,7 @@ class AddChemicalTest(TestCase):
                     chemical.add_chemical(123, ["salt"])
                     mock_open.return_value.__enter__.write.assert_not_called()
                     mock_print.assert_called()
+
     def test_writing(self):
         test_mass = 100
         test_names = ["a", "b", "c"]
@@ -60,6 +62,7 @@ class AddChemicalTest(TestCase):
                 mock_open.return_value.__enter__.return_value.write.assert_called_with(str(chemical.Chemical(test_mass, test_names)) + "\n")
 
 class LoadChemicalTest(TestCase):
+
     def test_correct_read(self):
         one_chemical = chemical.Chemical(123.4, ["name1", "name2"])
         other_chemical = chemical.Chemical(567.8, ["name3", "name4"])

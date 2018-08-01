@@ -14,17 +14,21 @@ from sys import exit
 class Chemical:
     # TODO: type safety on the molar mass
     def __init__(self, molar_mass, names):
-        if (type(molar_mass) not in [int, float]) and (not molar_mass.isdigit()):
+        try:
+            self.molar_mass = float(molar_mass)
+        except:
             print("Invalid molar mass: Molar mass must be a number")
             exit()
+
         self.names = names
-        self.molar_mass = float(molar_mass)
+
     def __repr__(self):
         # TODO: replace the name code with list_print
         string = str(self.molar_mass)
         for name in self.names:
             string += " " + name
         return string
+
     def __eq__(self, other):
         return self.molar_mass == other.molar_mass and set(self.names) == set(other.names)
 

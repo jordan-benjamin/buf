@@ -18,10 +18,12 @@ Usage:
     buf chemical <chemical_name>
     buf chemical -a <molar_mass> <chemical_names>...
     buf chemical -n <existing_name> <new_names>...
+    
 """
 
 def main():
     options = docopt(docstring)
+    print(options)
     for k, v in options.items():
         if hasattr(commands, k):
             module = getattr(commands, k)
