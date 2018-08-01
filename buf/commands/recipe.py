@@ -13,12 +13,18 @@ import os
 recipe_library_file = os.path.join(os.path.dirname(__file__), "../library/recipes.txt")
 
 # TODO: is using u as a substitute for µ ok?
-volume_units = {"L" : 1, "mL" : 1e-3, "µL" : 1e-6, "uL": 1e-6}
-mass_units = { "kg" : 1000, "g" : 1, "mg" : 1e-3, "ug": 1e-6, "µg" : 1e-6}
-molarity_units = {"M" : 1, "mM" : 1e-3, "uM" : 1e-6, "µM" : 1e-6}
+# TODO: add non-metric units?
+# TODO: move these out of recipe?
+volume_units_to_litres = {"L" : 1, "mL" : 1e-3, "µL" : 1e-6, "uL": 1e-6}
+mass_units_to_grams = {"kg" : 1000, "g" : 1, "mg" : 1e-3, "ug": 1e-6, "µg" : 1e-6}
+concentration_units_to_molar = {"M" : 1, "mM" : 1e-3, "uM" : 1e-6, "µM" : 1e-6}
+
+volume_units = list(volume_units_to_litres)
+mass_units = list(mass_units_to_grams)
+concentration_units = list(concentration_units_to_molar)
 
 # Casting a dictionary to a list returns a list of its keys.
-valid_units = list(volume_units) + list(molarity_units) + list(mass_units) + ["%"]
+valid_units = volume_units + mass_units + concentration_units + ["%"]
 
 def recipe():
     pass
@@ -79,6 +85,8 @@ class Recipe:
 
 
 
+# TODO: need a better name for this, it's used for more than concentrations.
+# NOTE: This method does NOT do any type checking.
 def split_concentration(string):
     # TODO: look into settings to find default unit if not specified.
     # TODO: handle bad inputs (no quantity or only ".")
