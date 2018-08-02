@@ -9,6 +9,19 @@ import tabulate
 
 from sys import exit
 
+instructions = """buf make:
+
+This subcommand determines the amount of each chemical that is required
+to make a buffer of a given volume.
+
+To make a buffer using a previously defined recipe (see 'buf recipe' for more information),
+use 'buf make <volume> <recipe_name>'. For example, to make 2L of a buffer named 'wash',
+(where 'wash' has already been defined with buf recipe), use 'buf make 2L wash'.
+
+Alternatively, one can define a buffer on the spot, with 'buf make <volume> (<concentration> 
+<chemical_name>)...'. An example usage of this is 'buf make 0.5L 300mM NaCl 10% glycerol'.
+Note that in this case, the molar mass of NaCl must already be stored in your chemical library. 
+"""
 
 def make(options):
     if options["<recipe_name>"]:
@@ -92,5 +105,3 @@ class BufferInstructions:
 
         # TODO: what looks better: fancy_grid or the default?
         print(tabulate.tabulate(matrix, headers=["Chemical Name", "Concentration", "Amount to Add"], tablefmt="fancy_grid"))
-
-

@@ -10,6 +10,23 @@ else:
 from sys import exit
 
 import os
+
+# TODO: format nicely.
+# TODO: is the constant volume/mass thing even a good idea?
+instructions = """buf recipe:
+
+This subcommand allows you to access and modify your recipe library. A recipe is a list of 
+chemical names preceded by their concentrations, for example '300mM NaCl 4M Arginine'.
+
+To add a recipe to your library, use 'buf recipe -a <recipe_name> (<concentration> <chemical_name>)...'.
+For example, to add the recipe specified above, use 'buf recipe -a my_recipe 300mM NaCl 4M Arginine'.
+ 
+Chemical concentrations can be specified in a number of ways. In addition to specifying molarity
+(e.g. '300mM NaCl'), you can specify a percentage of solution, for example '10% glycerol'.
+Furthermore, you can specify a constant mass or volume, to be added to the buffer regardless of 
+its volume. For example, specifying '10g NaCl' will result in 10g of NaCl being added to the buffer in all
+cases."""
+
 recipe_library_file = os.path.join(os.path.dirname(__file__), "../library/recipes.txt")
 
 # TODO: is using u as a substitute for µ ok?

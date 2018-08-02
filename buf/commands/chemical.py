@@ -6,10 +6,20 @@
 # TODO: make sure the relative path works.
 
 import os
-chemical_library_file = os.path.join(os.path.dirname(__file__), "../library/chemicals.txt")
-
 
 from sys import exit
+
+# TODO: check if lines this wide will fit on a terminal window of default size.
+instructions = """buf chemical:
+
+This subcommand allows you to access and modify your chemical library, i.e. your personal list of 
+chemicals that you use to make buffers.
+
+To add a chemical to your library, call 'buf chemical -a <molar_mass> <chemical_names>...' The repeating final 
+argument allows you to specify multiple names for the same chemical. For example, calling 'buf chemical 
+-a 58.44 NaCl salt' adds both 'NaCl' and 'salt' to your chemical library, both with the same molar mass."""
+
+chemical_library_file = os.path.join(os.path.dirname(__file__), "../library/chemicals.txt")
 
 class Chemical:
     # TODO: type safety on the molar mass
