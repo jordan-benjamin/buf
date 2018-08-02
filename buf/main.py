@@ -19,6 +19,7 @@ docstring = """
 buf
 
 Usage:
+    buf help <subcommand_name>
     buf chemical
     buf chemical <chemical_name>
     buf chemical -a <molar_mass> <chemical_names>...
@@ -29,8 +30,7 @@ Usage:
 """
 
 def main():
-    options = docopt(docstring)
-    #print(options)
+    options = docopt(docstring, help=False)
     for k, v in options.items():
         if v:
             if hasattr(commands, k):
@@ -48,9 +48,14 @@ def reset():
     commands.recipe.reset()
 
 reset()
-line("buf chemical -a 100 salt")
-line("buf chemical -a 200 pepper")
-line("buf make 2L 3M salt 10% pepper")
-
+line("buf chemical -a 154.25 DTT")
+line("buf chemical -a 58.44 NaCl")
+line("buf chemical -a 68.08 imidazole")
+line("buf chemical -a 121.1 tris")
+line(("buf chemical -a 74.55 KCl"))
+line("buf recipe -a wash 300mM NaCl 50mM tris 20mM imidazole")
+line("buf recipe -a elution 50mM tris 300mM KCl 500mM imidazole")
+line("buf make 1L wash")
+line("buf help chemical")
 
 

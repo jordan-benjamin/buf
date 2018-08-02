@@ -7,7 +7,7 @@ from unittest import mock, TestCase
 from tempfile import NamedTemporaryFile
 
 if __name__ == '__main__':
-    from ..commands import recipe
+    from buf.commands import recipe
 else:
     from buf.commands import recipe
 

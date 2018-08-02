@@ -6,11 +6,7 @@ from unittest import mock, TestCase
 import unittest
 from io import StringIO
 
-
-if __name__ == '__main__':
-    import chemical
-else:
-    from buf.commands import chemical
+from buf.commands import chemical
 
 class ChemicalTest(TestCase):
     # TODO: change test to mock sys.exit and assert called, instead of the try/except block.
