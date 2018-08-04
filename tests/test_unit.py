@@ -71,7 +71,7 @@ class ConversionMethodsTest(TestCase):
             for symbol in ladder.symbol_to_info.keys():
                 self.assertEqual(ladder.symbol_to_info[symbol].scale_factor, func(symbol))
 
-class ScaleUnitQuantityTest(TestCase):
+class ScaleAndRoundUnitQuantityTest(TestCase):
 
     def test_scaling(self):
 
@@ -80,3 +80,10 @@ class ScaleUnitQuantityTest(TestCase):
         self.assertEqual(unit.scale_and_round_unit_quantity(1000, "mg"), "1.0g")
 
         self.assertEqual(unit.scale_and_round_unit_quantity(1.0, "mg"), "1.0mg")
+
+    # TODO: needs to be updated when settings are added / custom rounding.
+    def test_rounding(self):
+
+        self.assertEqual(unit.scale_and_round_unit_quantity(123.456, "L"), "123.46L")
+        self.assertEqual(unit.scale_and_round_unit_quantity(0.123456, "L"), "123.46mL")
+        self.assertEqual(unit.scale_and_round_unit_quantity(10089, "µL"), "10.09mL")
