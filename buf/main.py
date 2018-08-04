@@ -6,8 +6,6 @@ from docopt import docopt
 
 import sys
 
-import tabulate
-
 if __name__ == '__main__':
     import commands
 else:
@@ -48,14 +46,19 @@ def reset():
     commands.recipe.reset()
 
 reset()
+
+line("buf help recipe")
 line("buf chemical -a 154.25 DTT")
 line("buf chemical -a 58.44 NaCl")
 line("buf chemical -a 68.08 imidazole")
 line("buf chemical -a 121.1 tris")
 line(("buf chemical -a 74.55 KCl"))
+line("buf chemical -a 210.66 Arginine Arg")
+line("buf chemical -a 238.3 HEPES")
+line("buf chemical -a 10 glycerol")
 line("buf recipe -a wash 300mM NaCl 50mM tris 20mM imidazole")
 line("buf recipe -a elution 50mM tris 300mM KCl 500mM imidazole")
-line("buf make 1L wash")
-line("buf help chemical")
+line("buf recipe -a refold 50mM HEPES 250mM KCl 500mM Arg 10mM DTT 20% glycerol")
+line("buf make 100mL refold")
 
 

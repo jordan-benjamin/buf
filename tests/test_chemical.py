@@ -1,33 +1,52 @@
-# File name: test_chemicals.py
+# File name: test_chemical.py
 # Author: Jordan Juravsky
 # Date created: 28-07-2018
 
 from unittest import mock, TestCase
-import unittest
 from io import StringIO
 
 from buf.commands import chemical
 
-class ChemicalTest(TestCase):
-    # TODO: change test to mock sys.exit and assert called, instead of the try/except block.
+class MakeSafeChemicalTest(TestCase):
+
+
     def test_molar_mass_check(self):
-            with mock.patch("buf.commands.chemical.print") as mock_print:
+        with mock.patch("buf.commands.chemical.print") as mock_print:
+            for test_molar_mass in [0, -10, "not a number"]:
                 try:
-                    chemical.Chemical("not a number", ["valid name"])
-                    raise Exception("Should not get to this line")
+                    chemical.make_safe_chemical(test_molar_mass, ["valid name"], {})
                 except:
-                    mock_print.assert_called()
-                    self.assertRaises(SystemExit)
+                    pass
+
+                self.assertRaises(SystemExit)
+                mock_print.assert_called()
+
                 mock_print.reset_mock()
 
+            for test_molar_mass in [100, 123.4]:
+                self.assertEqual(chemical.make_safe_chemical(test_molar_mass, ["valid name"]).molar_mass, test_molar_mass)
+                self.assertEqual(chemical.make_safe_chemical(str(test_molar_mass), ["valid name"]).molar_mass, test_molar_mass)
 
-                for test_molar_mass in [100, 123.4]:
-                    self.assertEqual(chemical.Chemical(test_molar_mass, ["valid name"]).molar_mass, test_molar_mass)
-                    self.assertEqual(chemical.Chemical(str(test_molar_mass), ["valid name"]).molar_mass, test_molar_mass)
+            mock_print.assert_not_called()
 
-                mock_print.assert_not_called()
+    def test_name_collision(self):
+        with mock.patch("buf.commands.chemical.print") as mock_print:
+                # Ensuring an invalid chemical is not created
+                try:
+                    chemical.make_safe_chemical(123, ["salt", "pepper"], {"salt": None})
+                except:
+                    pass
+
+                self.assertRaises(SystemExit)
+                mock_print.assert_called()
 
 
+                # Ensuring a valid chemical is created.
+                chemical.make_safe_chemical(123, ["salt"], {})
+
+
+
+class ChemicalTest(TestCase):
     def test_string_cast(self):
         test_chemical = chemical.Chemical(300, ["salt", "pepper"])
         self.assertTrue(str(test_chemical), "300 salt pepper")
@@ -39,23 +58,13 @@ class ChemicalTest(TestCase):
 
 class AddChemicalTest(TestCase):
 
-    # Tests that method will not write
-    def test_name_collision(self):
-        test_chemical = chemical.Chemical(100, ["salt"])
-        with mock.patch("buf.commands.chemical.load_chemicals", return_value = {"salt" : test_chemical}) as my_mock:
-            with mock.patch("buf.commands.chemical.open") as mock_open:
-                with mock.patch("buf.commands.chemical.print") as mock_print:
-                    chemical.add_chemical(123, ["salt"])
-                    mock_open.return_value.__enter__.write.assert_not_called()
-                    mock_print.assert_called()
-
     def test_writing(self):
         test_mass = 100
         test_names = ["a", "b", "c"]
         with mock.patch("buf.commands.chemical.load_chemicals", return_value={}):
             with mock.patch("buf.commands.chemical.open") as mock_open:
                 chemical.add_chemical(test_mass, test_names)
-                mock_open.return_value.__enter__.return_value.write.assert_called_with(str(chemical.Chemical(test_mass, test_names)) + "\n")
+                mock_open.return_value.__enter__.return_value.write.assert_called_with(str(chemical.make_safe_chemical(test_mass, test_names)) + "\n")
 
 class LoadChemicalTest(TestCase):
 
