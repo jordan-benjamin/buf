@@ -1,8 +1,10 @@
 # File name: make.py
 # Author: Jordan Juravsky
 # Date created: 31-07-2018
-import buf.unit
+
 from buf.commands import chemical, recipe
+
+from buf import unit
 
 import tabulate
 
@@ -38,7 +40,7 @@ def make(options):
 
 
 def get_buffer_litres(volume_as_string):
-    quantity, unit = buf.unit.split_unit_quantity(volume_as_string)
+    quantity, symbol = unit.split_unit_quantity(volume_as_string)
 
     try:
         quantity = float(quantity)
@@ -46,29 +48,34 @@ def get_buffer_litres(volume_as_string):
         print(f"Invalid quantity: '{quantity}' is not a valid number.")
         exit()
 
-    if unit not in volume_units:
-        print(f"Invalid unit: '{unit}' is not a valid unit of volume.")
+    if symbol not in volume_units:
+        print(f"Invalid unit: '{symbol}' is not a valid unit of volume.")
         exit()
 
-    return quantity * volume_unit_to_litres(unit)
+    return quantity * volume_unit_to_litres(symbol)
 
 
 def calculate_amount_to_add(buffer_volume_in_litres, chemical_object, concentration):
-    quantity, unit = buf.unit.split_unit_quantity(concentration)
+    quantity, symbol = unit.split_unit_quantity(concentration)
 
     # Try/catch this?
     quantity = float(quantity)
 
     # TODO: make sure unit is valid?
 
-    if unit in volume_units or unit in mass_units:
-        return concentration
-    elif unit in concentration_units:
+    # TODO: delete this?
+    if symbol in volume_units or symbol in mass_units:
+        pass
+    elif symbol in concentration_units:
         # TODO: convert to mg if number is small.
-        return str(quantity * concentration_unit_to_molar(unit) * chemical_object.molar_mass * buffer_volume_in_litres) + "g"
-    elif unit == "%":
+        quantity = quantity * concentration_unit_to_molar(symbol) * chemical_object.molar_mass * buffer_volume_in_litres
+        symbol = "g"
+    elif symbol == "%":
         # TODO: accomodate non-litre volume units.
-        return str(quantity / 100 * buffer_volume_in_litres) + "L"
+        quantity = quantity / 100 * buffer_volume_in_litres
+        symbol = "L"
+
+    return unit.scale_and_round_unit_quantity(quantity, symbol)
 
 def get_recipe(recipe_name):
     recipe_library = recipe.load_recipes()
