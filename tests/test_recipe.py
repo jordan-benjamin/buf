@@ -6,21 +6,15 @@ from unittest import mock, TestCase
 
 from tempfile import NamedTemporaryFile
 
+import buf.unit
+
 if __name__ == '__main__':
     from buf.commands import recipe
 else:
     from buf.commands import recipe
 
-class SplitConcentrationTest(TestCase):
-    def test_correct_split(self):
-        for quantity in ["100", "1.0", "2343.5", ".1", "10."]:
-            for unit in ["M", "L", "mM", ""]:
-                test_string = str(quantity)+unit
-                returned_quantity, returned_unit = recipe.split_concentration(test_string)
-                self.assertEqual(quantity, returned_quantity)
-                self.assertEqual(unit, returned_unit)
 
-class RecipeTest(TestCase):
+class MakeRecipeTest(TestCase):
     def test_existing_chemical_check(self):
 
         with mock.patch("buf.commands.recipe.exit") as mock_exit:
