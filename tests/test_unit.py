@@ -40,23 +40,43 @@ class UnitLadderTest(TestCase):
         test_ladder = unit.UnitLadder({"uL": 1e-6, "µL": 1e-6, "mL": 1e-3, "L": 1})
 
         # Intentional switching between µL and uL
-        self.assertEqual(test_ladder.scale_up("uL"), ("mL", 1e-3 / 1e-6))
-        self.assertEqual(test_ladder.scale_up("µL"), ("mL", 1e-3 / 1e-6))
-        self.assertEqual(test_ladder.scale_down("L"), ("mL",  1e-3 / 1))
+        self.assertEqual(test_ladder.scale_up_unit("uL"), ("mL", 1e-6 / 1e-3))
+        self.assertEqual(test_ladder.scale_up_unit("µL"), ("mL", 1e-6 / 1e-3))
+        self.assertEqual(test_ladder.scale_down_unit("L"), ("mL", 1 / 1e-3 ))
 
-        self.assertTrue(test_ladder.can_scale_up("mL"))
-        self.assertTrue(test_ladder.can_scale_down("mL"))
+        self.assertTrue(test_ladder.can_scale_up_unit("mL"))
+        self.assertTrue(test_ladder.can_scale_down_unit("mL"))
 
-        self.assertFalse(test_ladder.can_scale_up("L"))
-        self.assertTrue(test_ladder.can_scale_down("L"))
+        self.assertFalse(test_ladder.can_scale_up_unit("L"))
+        self.assertTrue(test_ladder.can_scale_down_unit("L"))
 
-        self.assertTrue(test_ladder.can_scale_up("µL"))
-        self.assertFalse(test_ladder.can_scale_down("uL"))
+        self.assertTrue(test_ladder.can_scale_up_unit("µL"))
+        self.assertFalse(test_ladder.can_scale_down_unit("uL"))
 
         with mock.patch("buf.unit.print") as mock_print:
             try:
-                test_ladder.scale_down("µL")
+                test_ladder.scale_down_unit("µL")
             except:
                 pass
             self.assertRaises(SystemExit)
             mock_print.assert_called()
+
+class ConversionMethodsTest(TestCase):
+
+    def test_conversions(self):
+        ladders = [unit.mass_units, unit.volume_units, unit.concentration_units]
+        funcs = [unit.mass_unit_to_grams, unit.volume_unit_to_litres, unit.concentration_unit_to_molar]
+
+        for ladder, func, in zip(ladders, funcs):
+            for symbol in ladder.symbol_to_info.keys():
+                self.assertEqual(ladder.symbol_to_info[symbol].scale_factor, func(symbol))
+
+class ScaleUnitQuantityTest(TestCase):
+
+    def test_scaling(self):
+
+        self.assertEqual(unit.scale_unit_quantity(0.1, "L"), (100, "mL"))
+        self.assertEqual(unit.scale_unit_quantity(10 * 1e-6, "M"), (10, "µM"))
+        self.assertEqual(unit.scale_unit_quantity(1000, "mg"), (1, "g"))
+
+        self.assertEqual(unit.scale_unit_quantity(1, "mg"), (1, "mg"))
