@@ -1,13 +1,15 @@
 # File name: make.py
 # Author: Jordan Juravsky
 # Date created: 31-07-2018
-
-
+import buf.unit
 from buf.commands import chemical, recipe
 
 import tabulate
 
 from sys import exit
+
+from buf.unit import volume_unit_to_litres, concentration_unit_to_molar, volume_units, mass_units, \
+    concentration_units
 
 instructions = """buf make:
 
@@ -36,7 +38,7 @@ def make(options):
 
 
 def get_buffer_litres(volume_as_string):
-    quantity, unit = recipe.split_concentration(volume_as_string)
+    quantity, unit = buf.unit.split_unit_quantity(volume_as_string)
 
     try:
         quantity = float(quantity)
@@ -44,26 +46,26 @@ def get_buffer_litres(volume_as_string):
         print(f"Invalid quantity: '{quantity}' is not a valid number.")
         exit()
 
-    if unit not in recipe.volume_units:
+    if unit not in volume_units:
         print(f"Invalid unit: '{unit}' is not a valid unit of volume.")
         exit()
 
-    return quantity * recipe.volume_units_to_litres[unit]
+    return quantity * volume_unit_to_litres(unit)
 
 
 def calculate_amount_to_add(buffer_volume_in_litres, chemical_object, concentration):
-    quantity, unit = recipe.split_concentration(concentration)
+    quantity, unit = buf.unit.split_unit_quantity(concentration)
 
     # Try/catch this?
     quantity = float(quantity)
 
     # TODO: make sure unit is valid?
 
-    if unit in recipe.volume_units or unit in recipe.mass_units:
+    if unit in volume_units or unit in mass_units:
         return concentration
-    elif unit in recipe.concentration_units:
+    elif unit in concentration_units:
         # TODO: convert to mg if number is small.
-        return str(quantity * recipe.concentration_units_to_molar[unit] * chemical_object.molar_mass * buffer_volume_in_litres) + "g"
+        return str(quantity * concentration_unit_to_molar(unit) * chemical_object.molar_mass * buffer_volume_in_litres) + "g"
     elif unit == "%":
         # TODO: accomodate non-litre volume units.
         return str(quantity / 100 * buffer_volume_in_litres) + "L"
@@ -105,3 +107,5 @@ class BufferInstructions:
 
         # TODO: what looks better: fancy_grid or the default?
         print(tabulate.tabulate(matrix, headers=["Chemical Name", "Concentration", "Amount to Add"], tablefmt="fancy_grid"))
+
+

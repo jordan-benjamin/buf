@@ -1,6 +1,7 @@
 # File name: recipe.py
 # Author: Jordan Juravsky
 # Date created: 31-07-2018
+from buf.unit import valid_units, split_unit_quantity
 
 if __name__ == '__main__':
     import chemical
@@ -29,19 +30,7 @@ cases."""
 
 recipe_library_file = os.path.join(os.path.dirname(__file__), "../library/recipes.txt")
 
-# TODO: is using u as a substitute for µ ok?
-# TODO: add non-metric units?
-# TODO: move these out of recipe?
-volume_units_to_litres = {"L" : 1, "mL" : 1e-3, "µL" : 1e-6, "uL": 1e-6}
-mass_units_to_grams = {"kg" : 1000, "g" : 1, "mg" : 1e-3, "ug": 1e-6, "µg" : 1e-6}
-concentration_units_to_molar = {"M" : 1, "mM" : 1e-3, "uM" : 1e-6, "µM" : 1e-6}
-
-volume_units = list(volume_units_to_litres)
-mass_units = list(mass_units_to_grams)
-concentration_units = list(concentration_units_to_molar)
-
 # Casting a dictionary to a list returns a list of its keys.
-valid_units = volume_units + mass_units + concentration_units + ["%"]
 
 
 def recipe(options):
@@ -69,7 +58,7 @@ def make_safe_recipe(name, concentrations, chemical_names, chemical_library = No
             print(f"Name not found: '{chemical_name}' not in chemical library.")
             exit()
 
-        quantity, unit = split_concentration(concentration)
+        quantity, unit = split_unit_quantity(concentration)
 
         # TODO: accept blank unit, load from settings.
         if unit not in valid_units:
@@ -123,26 +112,6 @@ class Recipe:
     def __eq__(self, other):
         return self.name == other.name and self.concentrations == \
                other.concentrations and self.chemical_names == other.chemical_names
-
-
-
-# TODO: need a better name for this, it's used for more than concentrations.
-# NOTE: This method does NOT do any type checking.
-def split_concentration(string):
-    # TODO: look into settings to find default unit if not specified.
-    # TODO: handle bad inputs (no quantity or only ".")
-    # TODO: check for valid unit (have list of acceptable units)
-    quantity = ""
-    index = 0
-    quantity_characters = [str(num) for num in range(10)] + ["."]
-    for character in string:
-        if character in quantity_characters:
-            quantity+= character
-            index += 1
-        else:
-            break
-    unit = string[index:]
-    return quantity, unit
 
 
 def load_recipes():
