@@ -75,8 +75,8 @@ class ScaleUnitQuantityTest(TestCase):
 
     def test_scaling(self):
 
-        self.assertEqual(unit.scale_unit_quantity(0.1, "L"), (100, "mL"))
-        self.assertEqual(unit.scale_unit_quantity(10 * 1e-6, "M"), (10, "µM"))
-        self.assertEqual(unit.scale_unit_quantity(1000, "mg"), (1, "g"))
+        self.assertEqual(unit.scale_and_round_unit_quantity(0.1, "L"), "100.0mL")
+        self.assertEqual(unit.scale_and_round_unit_quantity(10 * 1e-6, "M"), "10.0µM")
+        self.assertEqual(unit.scale_and_round_unit_quantity(1000, "mg"), "1.0g")
 
-        self.assertEqual(unit.scale_unit_quantity(1, "mg"), (1, "mg"))
+        self.assertEqual(unit.scale_and_round_unit_quantity(1.0, "mg"), "1.0mg")

@@ -178,13 +178,16 @@ def scale_down_unit_quantity(quantity: float, symbol: str):
 
     return quantity, symbol
 
-def scale_unit_quantity(quantity: float, symbol : str):
+# TODO: check settings for number of decimal places to round.
+def scale_and_round_unit_quantity(quantity: float, symbol : str):
     if quantity >= 1000:
-        return scale_up_unit_quantity(quantity, symbol)
+        quantity, symbol = scale_up_unit_quantity(quantity, symbol)
     elif quantity < 1:
-        return scale_down_unit_quantity(quantity, symbol)
-    else:
-        return quantity, symbol
+        quantity, symbol = scale_down_unit_quantity(quantity, symbol)
+
+    quantity = round(quantity, 2)
+
+    return str(quantity) + symbol
 
 # TODO: add moles?
 # TODO: add mg/ml and that stuff.
