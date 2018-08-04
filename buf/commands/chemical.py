@@ -7,29 +7,50 @@
 
 import os
 
+import tabulate
+
 from sys import exit
 
 # TODO: check if lines this wide will fit on a terminal window of default size.
 instructions = """buf chemical:
 
-This subcommand allows you to access and modify your chemical library, i.e. your personal list of 
-chemicals that you use to make buffers.
+This subcommand allows you to access and modify your chemical library, i.e. your personal 
+list of chemicals that you use to make buffers.
 
-To add a chemical to your library, call 'buf chemical -a <molar_mass> <chemical_names>...' The repeating final 
-argument allows you to specify multiple names for the same chemical. For example, calling 'buf chemical 
--a 58.44 NaCl salt' adds both 'NaCl' and 'salt' to your chemical library, both with the same molar mass."""
+To add a chemical to your library, call 'buf chemical -a <molar_mass> <chemical_names>...' 
+The repeating final argument allows you to specify multiple names for the same chemical. 
+For example, calling 'buf chemical -a 58.44 NaCl salt' adds both 'NaCl' and 'salt' to your 
+chemical library, both with the same molar mass."""
 
 chemical_library_file = os.path.join(os.path.dirname(__file__), "../library/chemicals.txt")
+
+def make_safe_chemical(molar_mass, names, chemical_library = None):
+    if chemical_library == None:
+        chemical_library = load_chemicals()
+
+    for name in names:
+        if name in chemical_library:
+            print(f"Name collision: '{name}' already exists in chemical library")
+            exit()
+
+    try:
+        molar_mass = float(molar_mass)
+    except:
+        print(f"Invalid molar mass: '{molar_mass}' is not a number.")
+        exit()
+
+
+    if molar_mass <= 0:
+        print(f"Invalid molar mass: '{molar_mass}' must be greater than 0.")
+        exit()
+
+    return Chemical(molar_mass, names)
+
 
 class Chemical:
     # TODO: type safety on the molar mass
     def __init__(self, molar_mass, names):
-        try:
-            self.molar_mass = float(molar_mass)
-        except:
-            print("Invalid molar mass: Molar mass must be a number")
-            exit()
-
+        self.molar_mass = molar_mass
         self.names = names
 
     def __repr__(self):
@@ -53,9 +74,10 @@ def load_chemicals():
         words = line.split()
         molar_mass = words[0]
         names = words[1:]
-        chemical = Chemical(molar_mass, names)
+        chemical = make_safe_chemical(molar_mass, names, chemical_library=chemicals)
         for name in names:
             chemicals[name] = chemical
+
 
     return chemicals
 
@@ -80,20 +102,24 @@ def display_chemical_information(name):
 
     else:
         # TODO: prompt user to add new chemical
-        print(f"Name not found: '{name}' does not currently exist in your chemical library")
+        print(f"Name not found: '{name}' does not currently exist in your chemical library.")
+
+        exit()
 
 
 def display_chemical_library():
     chemicals = load_chemicals()
 
+    # TODO: delete this line?
     print("The chemicals in your library are:\n")
 
-    string_format = "{:<20} {:<20}"
+    table = []
 
-    print(string_format.format("Chemical Name", "Molar Mass"))
-
+    # TODO: is it more efficient to use dict.items than this?
     for chemical_name in chemicals:
-        print(string_format.format(chemical_name, chemicals[chemical_name].molar_mass))
+        table.append([chemical_name, chemicals[chemical_name].molar_mass])
+
+    print(tabulate.tabulate(table, headers=["Chemical Name", "Molar Mass"], tablefmt="fancy_grid"))
 
 
 def save_chemicals(chemical_dict):
@@ -103,18 +129,7 @@ def save_chemicals(chemical_dict):
 
 
 def add_chemical(molar_mass, names):
-    chemical_dict = load_chemicals()
-
-    for name in names:
-        if name in chemical_dict:
-            # TODO: prompt user to view existing chemical entry.
-            # TODO: give user more options to resolve collision.
-            print(f"Naming collision: '{name}' already exists in chemical library.")
-            # TODO: should it print all naming collisions? this stops after only one.
-            return
-
-    new_chemical = Chemical(molar_mass, names)
-
+    new_chemical = make_safe_chemical(molar_mass, names)
     with open(chemical_library_file, "a") as file:
         file.write(str(new_chemical) + "\n")
 
