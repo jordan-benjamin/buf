@@ -24,6 +24,15 @@ chemical library, both with the same molar mass."""
 
 chemical_library_file = os.path.join(os.path.dirname(__file__), "../library/chemicals.txt")
 
+def chemical(options):
+    if options["-a"]:
+        add_chemical(options["<molar_mass>"], options["<chemical_names>"])
+    elif options["<chemical_name>"]:
+        display_chemical_information(options["<chemical_name>"])
+    else:
+        display_chemical_library()
+
+
 def make_safe_chemical(molar_mass, names, chemical_library = None):
     if chemical_library == None:
         chemical_library = load_chemicals()
@@ -137,11 +146,3 @@ def add_chemical(molar_mass, names):
 def reset():
     with open(chemical_library_file, "w") as file:
         pass
-
-def chemical(options):
-    if options["-a"]:
-        add_chemical(options["<molar_mass>"], options["<chemical_names>"])
-    elif options["<chemical_name>"]:
-        display_chemical_information(options["<chemical_name>"])
-    else:
-        display_chemical_library()
