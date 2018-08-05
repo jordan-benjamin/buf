@@ -6,6 +6,9 @@ from unittest import mock, TestCase
 
 from tempfile import NamedTemporaryFile
 
+from io import StringIO
+
+
 import buf.unit
 
 if __name__ == '__main__':
@@ -114,8 +117,8 @@ class IntegratedTests(TestCase):
 
                 with mock.patch("buf.commands.recipe.load_recipes", return_value = {}):
 
-                    recipe.add_recipe("name", ["300mM"], ["salt"])
-                    recipe.add_recipe("other", ["4M"], ["pepper"])
+                    recipe.add_single_recipe("name", ["300mM"], ["salt"])
+                    recipe.add_single_recipe("other", ["4M"], ["pepper"])
 
                 recipes = recipe.load_recipes()
 
@@ -124,3 +127,49 @@ class IntegratedTests(TestCase):
                 for key, value in correct_dict.items():
                     self.assertTrue(key in recipes)
                     self.assertEqual(value, recipes[key])
+
+class TestAddFromFile(TestCase):
+
+    def test_errors(self):
+        with mock.patch("buf.commands.recipe.open") as mock_open:
+            with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value = {"Arg" : None, "KCl" : None,
+                                                                                           "salt" : None, "pepper" : None}):
+                with mock.patch("buf.commands.recipe.load_recipes", return_value = {"wash" : None, "elution" : None}):
+                    with mock.patch("buf.commands.recipe.print") as mock_print:
+                        # Invalid file contents
+                        for file_contents in ["refold 500mM unknownchemical 5g Arg", "wash 300mM salt", "name 300weirdunit pepper",
+                                              "refold 300mM salt\nrefold 4M pepper", "name 300mM"]:
+                            with self.assertRaises(SystemExit):
+
+                                mock_open.return_value.__enter__.return_value = StringIO(file_contents)
+                                recipe.add_recipes_from_file("whatever")
+                                mock_print.assert_called()
+                                mock_open.return_value.__enter__.return_value.write.assert_not_called()
+
+                                mock_print.reset_mock()
+
+                        # Valid file contents
+                        for file_contents in ["refold 300mM Arg", "refold 4mL pepper 10% salt", "refold 3M salt\nother 4% pepper"]:
+                            mock_open.return_value.__enter__.return_value = StringIO(file_contents)
+                            recipe.add_recipes_from_file("whatever")
+
+
+
+    def test_correct_writing(self):
+        with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value = {"Arg" : None, "KCl" : None,
+                                                                                        "salt" : None, "pepper" : None}):
+            temp_library_file = NamedTemporaryFile(mode="a+")
+            with open(temp_library_file.name, "a") as file:
+                file.write("wash 3M salt 10% pepper\nelution 4g Arg\n")
+
+            temp_file_to_add = NamedTemporaryFile(mode = "a+")
+            with open(temp_file_to_add.name, "a") as file:
+                file.write("refold 4% KCl 3M salt\nother 4M Arg 10.5L pepper")
+
+            with mock.patch("buf.commands.recipe.recipe_library_file", temp_library_file.name):
+                recipe.add_recipes_from_file(temp_file_to_add.name)
+
+                with open(temp_library_file.name, "r") as file:
+                    contents = file.read()
+
+                self.assertEqual(contents, "wash 3M salt 10% pepper\nelution 4g Arg\nrefold 4% KCl 3M salt\nother 4M Arg 10.5L pepper\n")

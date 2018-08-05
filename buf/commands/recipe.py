@@ -35,7 +35,7 @@ recipe_library_file = os.path.join(os.path.dirname(__file__), "../library/recipe
 
 def recipe(options):
     if options["-a"] == True:
-        add_recipe(options["<recipe_name>"], options["<concentration>"], options["<chemical_name>"])
+        add_single_recipe(options["<recipe_name>"], options["<concentration>"], options["<chemical_name>"])
     elif options["<recipe_name>"]:
         display_recipe_information(options["<recipe_name>"])
 
@@ -88,8 +88,6 @@ def display_recipe_information(recipe_name):
     print(f"Contents: {recipe_object.get_contents()}")
 
 
-
-
 class Recipe:
     def __init__(self, name, concentrations, chemical_names):
 
@@ -138,12 +136,68 @@ def load_recipes():
     return recipes
 
 
-def add_recipe(name, concentrations, chemical_names):
+def add_single_recipe(name, concentrations, chemical_names):
 
     new_recipe = make_safe_recipe(name, concentrations, chemical_names)
 
     with open(recipe_library_file, "a") as file:
         file.write(str(new_recipe) + "\n")
+
+# TODO: what's better practice? reading file lines then getting out, or iterating through the file inside the context manager?
+def add_recipes_from_file(filename : str):
+    try:
+        with open(filename, "r") as file:
+            lines = file.readlines()
+    except:
+        # TODO: tell user to specify absolute path / go to the right directory?
+        print(f"File not found: '{filename}' could not be located.")
+
+    existing_chemical_library = chemical.load_chemicals()
+    existing_recipe_library = load_recipes()
+
+    new_recipe_library = {}
+
+    for line_number, line in enumerate(lines):
+
+        try:
+            words = line.split()
+            if len(words) == 0:
+                continue
+            elif len(words) < 3:
+                print(f"Invalid line length: line {line_number} must contain at least one concentration-chemical name pair.")
+                exit()
+            elif len(words) % 2 == 0:
+                print(f"Invalid line length: line {line_number} contains an inequal number of concentrations and chemical names.")
+                exit()
+
+            recipe_name = words[0]
+
+            # TODO: is this readable?
+            concentrations = [words[i] for i in range(1, len(words), 2)]
+            chemical_names = [words[i] for i in range(2, len(words), 2)]
+
+
+            new_recipe_object = make_safe_recipe(recipe_name, concentrations, chemical_names, chemical_library=existing_chemical_library,
+                                          recipe_library=existing_recipe_library)
+
+            if recipe_name in new_recipe_library:
+                print(f"Duplicate file entry: '{name}' already used earlier in file.")
+                exit()
+
+
+            new_recipe_library[recipe_name] = new_recipe_object
+
+        except:
+            print(f"Error encountered on line {line_number}. Recipes specified in file not added to library.")
+            exit()
+
+    with open(recipe_library_file, "a") as file:
+        # Note: dict.values() can be used here but not in chemical.add_chemicals_from_file, since chemicals can
+        # have multiple names, and therefore will appear multiple times in values()
+        for new_recipe in list(new_recipe_library.values()):
+            file.write(str(new_recipe) + "\n")
+
+    print(f"Added the following recipes to your library: ", *list(new_recipe_library.keys()))
 
 def reset():
     with open(recipe_library_file, "w") as file:
