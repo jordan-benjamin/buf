@@ -62,7 +62,7 @@ def make_safe_recipe(name, concentrations, chemical_names, chemical_library = No
         if symbol in unit.concentration_units and chemical_name not in chemical_library:
             print(f"Chemical not found: molar mass of '{chemical_name}' not in chemical library. "
                   "Before specifying a chemical's concentration with molarity, first use 'buf chemical -a "
-                  "<molar_mass> <names>...' to add the chemical to your library.")
+                  "<molar_mass> <chemical_names>...' to add the chemical to your library.")
             exit()
 
 
@@ -197,7 +197,7 @@ def add_recipes_from_file(filename : str):
         for new_recipe in list(new_recipe_library.values()):
             file.write(str(new_recipe) + "\n")
 
-    print(f"Added the following recipes to your library: ", *list(new_recipe_library.keys()))
+    print(f"Added the following recipes to your library:", *list(new_recipe_library.keys()))
 
 def reset():
     with open(recipe_library_file, "w") as file:
