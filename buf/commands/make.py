@@ -10,9 +10,6 @@ import tabulate
 
 from sys import exit
 
-from buf.unit import volume_unit_to_litres, concentration_unit_to_molar, volume_units, mass_units, \
-    concentration_units
-
 instructions = """buf make:
 
 This subcommand determines the amount of each chemical that is required
@@ -48,15 +45,18 @@ def get_buffer_litres(volume_as_string):
         print(f"Invalid quantity: '{quantity}' is not a valid number.")
         exit()
 
-    if symbol not in volume_units:
+    if symbol not in unit.volume_units:
         print(f"Invalid unit: '{symbol}' is not a valid unit of volume.")
         exit()
 
-    return quantity * volume_unit_to_litres(symbol)
+    return quantity * unit.volume_unit_to_litres(symbol)
 
 
-def calculate_amount_to_add(buffer_volume_in_litres, chemical_object, concentration):
+def calculate_amount_to_add(buffer_volume_in_litres, concentration, chemical_name, chemical_library):
     quantity, symbol = unit.split_unit_quantity(concentration)
+
+    if symbol in unit.concentration_units:
+        chemical_object = chemical_library[chemical_name]
 
     # Try/catch this?
     quantity = float(quantity)
@@ -64,11 +64,11 @@ def calculate_amount_to_add(buffer_volume_in_litres, chemical_object, concentrat
     # TODO: make sure unit is valid?
 
     # TODO: delete this?
-    if symbol in volume_units or symbol in mass_units:
+    if symbol in unit.volume_units or symbol in unit.mass_units:
         pass
-    elif symbol in concentration_units:
+    elif symbol in unit.concentration_units:
         # TODO: convert to mg if number is small.
-        quantity = quantity * concentration_unit_to_molar(symbol) * chemical_object.molar_mass * buffer_volume_in_litres
+        quantity = quantity * unit.concentration_unit_to_molar(symbol) * chemical_object.molar_mass * buffer_volume_in_litres
         symbol = "g"
     elif symbol == "%":
         # TODO: accomodate non-litre volume units.
@@ -104,8 +104,8 @@ class BufferInstructions:
         chemical_library = chemical.load_chemicals()
 
         for concentration, chemical_name in zip(recipe_object.concentrations, recipe_object.chemical_names):
-            chemical_object = chemical_library[chemical_name]
-            self.steps.append(Step(chemical_name, concentration, calculate_amount_to_add(buffer_volume_in_litres, chemical_object, concentration)))
+            self.steps.append(Step(chemical_name, concentration,
+                                   calculate_amount_to_add(buffer_volume_in_litres, concentration, chemical_name, chemical_library)))
 
         # TODO: sort the steps in some way (need to implement in Step class first).
 

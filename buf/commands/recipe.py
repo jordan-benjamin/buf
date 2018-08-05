@@ -1,12 +1,9 @@
 # File name: recipe.py
 # Author: Jordan Juravsky
 # Date created: 31-07-2018
-from buf.unit import valid_units, split_unit_quantity
 
-if __name__ == '__main__':
-    import chemical
-else:
-    from buf.commands import chemical
+from buf import unit
+from buf.commands import chemical
 
 from sys import exit
 
@@ -53,18 +50,21 @@ def make_safe_recipe(name, concentrations, chemical_names, chemical_library = No
         exit()
 
     for concentration, chemical_name in zip(concentrations, chemical_names):
-        if chemical_name not in chemical_library:
-            # TODO: prompt user to add chemical.
-            print(f"Name not found: '{chemical_name}' not in chemical library.")
-            exit()
 
-        quantity, unit = split_unit_quantity(concentration)
+        quantity, symbol = unit.split_unit_quantity(concentration)
 
         # TODO: accept blank unit, load from settings.
-        if unit not in valid_units:
+        if symbol not in unit.valid_units:
             # TODO: display all valid units?
-            print(f"Invalid unit: '{unit}' is not a valid unit.")
+            print(f"Invalid unit: '{symbol}' is not a valid unit.")
             exit()
+
+        if symbol in unit.concentration_units and chemical_name not in chemical_library:
+            print(f"Chemical not found: molar mass of '{chemical_name}' is not in chemical library. "
+                  "Before specifying a chemical's concentration with molarity, first use 'buf chemical -a "
+                  "<molar_mass> <names>...' to add the chemical to your library")
+            exit()
+
 
         try:
             float_quantity = float(quantity)
