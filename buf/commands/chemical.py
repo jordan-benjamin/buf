@@ -28,9 +28,9 @@ def chemical(options : dict):
 
     if options["-a"]:
         if options["<file_name>"]:
-            add_chemical_from_file(options["<file_name>"])
+            add_chemicals_from_file(options["<file_name>"])
         else:
-            add_chemical(options["<molar_mass>"], options["<chemical_names>"])
+            add_single_chemical(options["<molar_mass>"], options["<chemical_names>"])
 
     elif options["<chemical_name>"]:
         display_chemical_information(options["<chemical_name>"])
@@ -39,7 +39,7 @@ def chemical(options : dict):
         display_chemical_library()
 
 # TODO: what's better practice? reading file lines then getting out, or iterating through the file inside the context manager?
-def add_chemical_from_file(filename : str):
+def add_chemicals_from_file(filename : str):
     try:
         with open(filename, "r") as file:
             lines = file.readlines()
@@ -53,17 +53,19 @@ def add_chemical_from_file(filename : str):
     new_chemical_objects = []
 
     for line_number, line in enumerate(lines):
-        words = line.split()
-        if len(words) == 0:
-            continue
-        elif len(words) < 2:
-            print(f"Invalid line length: line {line_number} must have at least one name after its molar mass.")
-            exit()
-
-        molar_mass = words[0]
-        names = words[1:]
 
         try:
+            words = line.split()
+            if len(words) == 0:
+                continue
+            elif len(words) < 2:
+                print(f"Invalid line length: line {line_number} must have at least one name after its molar mass.")
+                exit()
+
+            molar_mass = words[0]
+            names = words[1:]
+
+
             new_chemical = make_safe_chemical(molar_mass, names, chemical_library=existing_chemical_library)
 
             for name in names:
@@ -185,7 +187,7 @@ def display_chemical_library():
     print(tabulate.tabulate(table, headers=["Chemical Name", "Molar Mass"], tablefmt="fancy_grid"))
 
 
-def add_chemical(molar_mass, names):
+def add_single_chemical(molar_mass, names):
     new_chemical = make_safe_chemical(molar_mass, names)
     with open(chemical_library_file, "a") as file:
         file.write(str(new_chemical) + "\n")

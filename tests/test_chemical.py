@@ -64,7 +64,7 @@ class AddChemicalTest(TestCase):
         test_names = ["a", "b", "c"]
         with mock.patch("buf.commands.chemical.load_chemicals", return_value={}):
             with mock.patch("buf.commands.chemical.open") as mock_open:
-                chemical.add_chemical(test_mass, test_names)
+                chemical.add_single_chemical(test_mass, test_names)
                 mock_open.return_value.__enter__.return_value.write.assert_called_with(str(chemical.make_safe_chemical(test_mass, test_names)) + "\n")
 
 class LoadChemicalTest(TestCase):
@@ -90,7 +90,7 @@ class TestAddFromFile(TestCase):
                         with self.assertRaises(SystemExit):
 
                             mock_open.return_value.__enter__.return_value = StringIO(file_contents)
-                            chemical.add_chemical_from_file("whatever")
+                            chemical.add_chemicals_from_file("whatever")
                             mock_print.assert_called()
                             mock_open.return_value.__enter__.return_value.write.assert_not_called()
 
@@ -99,7 +99,7 @@ class TestAddFromFile(TestCase):
                     # Valid file contents
                     for file_contents in ["100 salt pepper\n200 name\n123.5 has three names"]:
                         mock_open.return_value.__enter__.return_value = StringIO(file_contents)
-                        chemical.add_chemical_from_file("whatever")
+                        chemical.add_chemicals_from_file("whatever")
 
 
 
@@ -113,7 +113,7 @@ class TestAddFromFile(TestCase):
             file.write("74.55 KCl\n68.08 imidazole imi")
 
         with mock.patch("buf.commands.chemical.chemical_library_file", temp_library_file.name):
-            chemical.add_chemical_from_file(temp_file_to_add.name)
+            chemical.add_chemicals_from_file(temp_file_to_add.name)
 
             with open(temp_library_file.name, "r") as file:
                 contents = file.read()
