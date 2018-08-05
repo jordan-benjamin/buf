@@ -60,9 +60,9 @@ def make_safe_recipe(name, concentrations, chemical_names, chemical_library = No
             exit()
 
         if symbol in unit.concentration_units and chemical_name not in chemical_library:
-            print(f"Chemical not found: molar mass of '{chemical_name}' is not in chemical library. "
+            print(f"Chemical not found: molar mass of '{chemical_name}' not in chemical library. "
                   "Before specifying a chemical's concentration with molarity, first use 'buf chemical -a "
-                  "<molar_mass> <names>...' to add the chemical to your library")
+                  "<molar_mass> <names>...' to add the chemical to your library.")
             exit()
 
 
