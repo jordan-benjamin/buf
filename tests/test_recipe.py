@@ -20,6 +20,7 @@ else:
 class MakeRecipeTest(TestCase):
     def test_existing_chemical_check(self):
 
+        # TODO: verify that it only throws an error on concentration units.
         with mock.patch("buf.commands.recipe.exit") as mock_exit:
             with mock.patch("buf.commands.recipe.print") as mock_print:
                 # Testing the code stops if no matching chemical
@@ -156,20 +157,22 @@ class TestAddFromFile(TestCase):
 
 
     def test_correct_writing(self):
-        with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value = {"Arg" : None, "KCl" : None,
-                                                                                        "salt" : None, "pepper" : None}):
-            temp_library_file = NamedTemporaryFile(mode="a+")
-            with open(temp_library_file.name, "a") as file:
-                file.write("wash 3M salt 10% pepper\nelution 4g Arg\n")
+        with mock.patch("buf.commands.recipe.print") as mock_print:
+            with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value = {"Arg" : None, "KCl" : None,
+                                                                                            "salt" : None, "pepper" : None}):
+                temp_library_file = NamedTemporaryFile(mode="a+")
+                with open(temp_library_file.name, "a") as file:
+                    file.write("wash 3M salt 10% pepper\nelution 4g Arg\n")
 
-            temp_file_to_add = NamedTemporaryFile(mode = "a+")
-            with open(temp_file_to_add.name, "a") as file:
-                file.write("refold 4% KCl 3M salt\nother 4M Arg 10.5L pepper")
+                temp_file_to_add = NamedTemporaryFile(mode = "a+")
+                with open(temp_file_to_add.name, "a") as file:
+                    file.write("refold 4% KCl 3M salt\nother 4M Arg 10.5L pepper")
 
-            with mock.patch("buf.commands.recipe.recipe_library_file", temp_library_file.name):
-                recipe.add_recipes_from_file(temp_file_to_add.name)
+                with mock.patch("buf.commands.recipe.recipe_library_file", temp_library_file.name):
+                    recipe.add_recipes_from_file(temp_file_to_add.name)
 
-                with open(temp_library_file.name, "r") as file:
-                    contents = file.read()
+                    with open(temp_library_file.name, "r") as file:
+                        contents = file.read()
 
-                self.assertEqual(contents, "wash 3M salt 10% pepper\nelution 4g Arg\nrefold 4% KCl 3M salt\nother 4M Arg 10.5L pepper\n")
+                    self.assertEqual(contents, "wash 3M salt 10% pepper\nelution 4g Arg\nrefold 4% KCl 3M salt\nother 4M Arg 10.5L pepper\n")
+                    mock_print.assert_called()
