@@ -130,6 +130,18 @@ def add_chemicals_from_file(filename : str):
 
     print(f"Added the following chemicals to your library:", *new_chemical_names)
 
+def save_chemical_library(chemical_library: dict):
+    unique_chemical_objects = []
+
+    for chemical_object in chemical_library.values():
+        if chemical_object not in unique_chemical_objects:
+            unique_chemical_objects.append(chemical_object)
+
+    with open(chemical_library_file, "w") as file:
+        for chemical_object in unique_chemical_objects:
+            file.write(str(chemical_object) + "\n")
+
+
 def load_chemicals():
     with open(chemical_library_file, "r") as file:
         chemical_lines = file.readlines()
@@ -186,8 +198,23 @@ def display_chemical_library():
 
     print(tabulate.tabulate(table, headers=["Chemical Name", "Molar Mass"], tablefmt="fancy_grid"))
 
-
-
 def reset():
     with open(chemical_library_file, "w") as file:
         pass
+
+def nickname_chemical(existing_chemical_name: str, new_name: str):
+    chemical_library = load_chemicals()
+
+    if existing_chemical_name not in chemical_library:
+        print(f"Name error: '{existing_chemical_name}' does not exist in chemical library.")
+        exit()
+
+    if new_name in chemical_library:
+        print(f"Name error: '{new_name}' already exists in chemical library.")
+        exit()
+
+    chemical_object = chemical_library[existing_chemical_name]
+
+    chemical_object.names.append(new_name)
+
+    save_chemical_library(chemical_library)

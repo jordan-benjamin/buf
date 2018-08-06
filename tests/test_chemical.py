@@ -14,21 +14,17 @@ class MakeSafeChemicalTest(TestCase):
     def test_molar_mass_check(self):
         with mock.patch("buf.commands.chemical.print") as mock_print:
             for test_molar_mass in [0, -10, "not a number"]:
-                try:
+                with self.assertRaises(SystemExit):
                     chemical.make_safe_chemical(test_molar_mass, ["valid name"], {})
-                except:
-                    pass
+                    mock_print.assert_called()
+                    mock_print.reset_mock()
 
-                self.assertRaises(SystemExit)
-                mock_print.assert_called()
-
-                mock_print.reset_mock()
+            mock_print.reset_mock()
 
             for test_molar_mass in [100, 123.4]:
                 self.assertEqual(chemical.make_safe_chemical(test_molar_mass, ["valid name"]).molar_mass, test_molar_mass)
                 self.assertEqual(chemical.make_safe_chemical(str(test_molar_mass), ["valid name"]).molar_mass, test_molar_mass)
-
-            mock_print.assert_not_called()
+                mock_print.assert_not_called()
 
     def test_name_collision(self):
         with mock.patch("buf.commands.chemical.print") as mock_print:
@@ -113,7 +109,9 @@ class TestAddFromFile(TestCase):
             file.write("74.55 KCl\n68.08 imidazole imi")
 
         with mock.patch("buf.commands.chemical.chemical_library_file", temp_library_file.name):
-            chemical.add_chemicals_from_file(temp_file_to_add.name)
+            with mock.patch("buf.commands.chemical.print") as mock_print:
+                chemical.add_chemicals_from_file(temp_file_to_add.name)
+                mock_print.assert_called()
 
             with open(temp_library_file.name, "r") as file:
                 contents = file.read()
@@ -121,3 +119,52 @@ class TestAddFromFile(TestCase):
             self.assertEqual(contents, "100 salt pepper\n154.25 DTT\n74.55 KCl\n68.08 imidazole imi\n")
 
 
+class SaveChemicalLibraryTest(TestCase):
+    def test_read_write(self):
+        temp_file = NamedTemporaryFile("w+")
+
+        file_contents = "100.0 salt pepper\n0.5 Arg Arginine\n54.55 NaCl\n"
+        with open(temp_file.name, "w") as file:
+            file.write(file_contents)
+
+        with mock.patch("buf.commands.chemical.chemical_library_file", temp_file.name):
+            read_chemical_dict = chemical.load_chemicals()
+
+            chemical.save_chemical_library(read_chemical_dict)
+
+            read_again = chemical.load_chemicals()
+
+            self.assertEqual(read_chemical_dict, read_again)
+
+class NickNameTest(TestCase):
+
+    def test_errors(self):
+        with mock.patch("buf.commands.chemical.load_chemicals", return_value = {"NaCl" : None, "Arg" : None}):
+            with mock.patch("buf.commands.chemical.print") as mock_print:
+                for existing_name, new_name in [("unknown", "nickname"), ("NaCl", "Arg"), ("NaCl", "NaCl")]:
+                    with self.assertRaises(SystemExit):
+                        chemical.nickname_chemical(existing_name, new_name)
+                        mock_print.assert_called()
+                    mock_print.reset_mock()
+
+    def test_correct_write(self):
+        temp_file = NamedTemporaryFile("w+")
+
+        file_contents = "100.0 salt pepper\n0.5 Arg Arginine\n54.55 NaCl\n"
+        with open(temp_file.name, "w") as file:
+            file.write(file_contents)
+
+        with mock.patch("buf.commands.chemical.chemical_library_file", temp_file.name):
+            read_chemical_dict = chemical.load_chemicals()
+
+            chemical_object = read_chemical_dict["salt"]
+
+            chemical_object.names.append("newname")
+
+            read_chemical_dict["newname"] = chemical_object
+
+            chemical.nickname_chemical("salt", "newname")
+
+            new_dict = chemical.load_chemicals()
+
+            self.assertEqual(read_chemical_dict, new_dict)
