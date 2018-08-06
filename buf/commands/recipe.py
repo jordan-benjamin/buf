@@ -2,7 +2,7 @@
 # Author: Jordan Juravsky
 # Date created: 31-07-2018
 
-from buf import unit
+from buf import unit, user_input
 from buf.commands import chemical
 
 from sys import exit
@@ -71,6 +71,10 @@ def make_safe_recipe(name, concentrations, chemical_names, chemical_library = No
         except:
             # TODO: change this message to mention numbers?
             print(f"Invalid quantity: '{quantity}' is not a valid quantity")
+            exit()
+
+        if float_quantity <= 0:
+            print(f"Invalid quantity: '{float_quantity}' is not greater than 0.")
             exit()
 
     return Recipe(name, concentrations, chemical_names)
@@ -198,6 +202,25 @@ def add_recipes_from_file(filename : str):
             file.write(str(new_recipe) + "\n")
 
     print(f"Added the following recipes to your library:", *list(new_recipe_library.keys()))
+
+def save_recipe_library(recipe_library: dict):
+    with open(recipe_library_file, "w") as file:
+        for recipe_object in recipe_library.values():
+            file.write(str(recipe_object) + "\n")
+
+def delete_recipe(recipe_name: str, prompt_for_confirmation: bool = True):
+    recipe_library = load_recipes()
+
+    if recipe_name not in recipe_library:
+        print(f"Recipe not found: '{recipe_name}' not found in recipe library.")
+        exit()
+
+    if prompt_for_confirmation:
+        user_input.confirm()
+
+    del(recipe_library[recipe_name])
+
+    save_recipe_library(recipe_library)
 
 def reset():
     with open(recipe_library_file, "w") as file:

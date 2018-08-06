@@ -11,75 +11,59 @@ from io import StringIO
 
 import buf.unit
 
-if __name__ == '__main__':
-    from buf.commands import recipe
-else:
-    from buf.commands import recipe
+from buf.commands import recipe
 
 
 class MakeRecipeTest(TestCase):
+
     def test_existing_chemical_check(self):
 
         # TODO: verify that it only throws an error on concentration units.
-        with mock.patch("buf.commands.recipe.exit") as mock_exit:
             with mock.patch("buf.commands.recipe.print") as mock_print:
                 # Testing the code stops if no matching chemical
-                with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={}):
-                    recipe.make_safe_recipe("boop", ["300mM"], ["Salt"])
-                    mock_exit.assert_called()
+                with self.assertRaises(SystemExit):
+                    recipe.make_safe_recipe("boop", ["300mM"], ["Salt"], chemical_library= {}, recipe_library={})
                     mock_print.assert_called()
 
-                mock_exit.reset_mock()
                 mock_print.reset_mock()
 
-                # Testing the code doesn't stop if the chemicals do exist.
-                with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={"salt" : None}):
-                    recipe.make_safe_recipe("boop", ["300mM"], ["salt"])
-                    mock_exit.assert_not_called()
-                    mock_print.assert_not_called()
+                # Testing code words if chemical exists.
+                recipe.make_safe_recipe("boop", ["300mM"], ["salt"], chemical_library={"salt" : None}, recipe_library= {})
+                mock_print.assert_not_called()
 
 
     def test_unit_validity(self):
-        with mock.patch("buf.commands.recipe.exit") as mock_exit:
-            with mock.patch("buf.commands.recipe.print") as mock_print:
-                with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={"salt" : None}):
-                    # Testing valid units.
-                    for unit in ["M", "L", "ug"]:
-                        recipe.make_safe_recipe("name", ["123" + unit], ["salt"])
-                        mock_print.assert_not_called()
-                        mock_exit.assert_not_called()
-                        mock_exit.reset_mock()
-                        mock_print.reset_mock()
+        with mock.patch("buf.commands.recipe.print") as mock_print:
+            # Testing valid units.
+            for unit in ["M", "L", "ug"]:
+                recipe.make_safe_recipe("name", ["123" + unit], ["salt"], chemical_library={"salt" : None}, recipe_library={})
+                mock_print.assert_not_called()
+                mock_print.reset_mock()
 
-                    # Testing invalid units.
-                    for unit in ["", "invalid", "inval1d_w1th_numb3rs"]:
-                        recipe.make_safe_recipe("name", ["123" + unit], ["salt"])
-                        mock_print.assert_called()
-                        mock_exit.assert_called()
-                        mock_exit.reset_mock()
-                        mock_print.reset_mock()
+            # Testing invalid units.
+            for unit in ["", "invalid", "inval1d_w1th_numb3rs"]:
+
+                with self.assertRaises(SystemExit):
+                    recipe.make_safe_recipe("name", ["123" + unit], ["salt"], chemical_library={"salt" : None}, recipe_library={})
+
+                mock_print.assert_called()
+                mock_print.reset_mock()
 
     def test_quantity_validity(self):
-        with mock.patch("buf.commands.recipe.exit") as mock_exit:
-            with mock.patch("buf.commands.recipe.print") as mock_print:
-                with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={"salt": None}):
+        with mock.patch("buf.commands.recipe.print") as mock_print:
 
-                    # Testing valid quantities.
-                    for quantity in ["100", "100.1", "0.1", ".1", "10."]:
-                        recipe.make_safe_recipe("name", [quantity + "M"], ["salt"])
-                        mock_print.assert_not_called()
-                        mock_exit.assert_not_called()
-                        mock_exit.reset_mock()
-                        mock_print.reset_mock()
+            # Testing valid quantities.
+            for quantity in ["100", "100.1", "0.1", ".1", "10."]:
+                recipe.make_safe_recipe("name", [quantity + "M"], ["salt"], recipe_library={}, chemical_library={"salt" : None})
+                mock_print.assert_not_called()
+                mock_print.reset_mock()
 
-                    # Testing invalid quantities.
-                    # TODO: negative numbers and zero?
-                    for quantity in [""]:
-                        recipe.make_safe_recipe("name", [quantity + "L"], ["salt"])
-                        mock_print.assert_called()
-                        mock_exit.assert_called()
-                        mock_exit.reset_mock()
-                        mock_print.reset_mock()
+            # Testing invalid quantities.
+            for quantity in ["", "-1", "0"]:
+                with self.assertRaises(SystemExit):
+                    recipe.make_safe_recipe("name", [quantity + "L"], ["salt"], chemical_library={"salt" : None}, recipe_library={})
+                mock_print.assert_called()
+                mock_print.reset_mock()
 
     def test_string_cast(self):
         with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={"salt": None, "pepper" : None}):
@@ -176,3 +160,51 @@ class TestAddFromFile(TestCase):
 
                     self.assertEqual(contents, "wash 3M salt 10% pepper\nelution 4g Arg\nrefold 4% KCl 3M salt\nother 4M Arg 10.5L pepper\n")
                     mock_print.assert_called()
+
+class SaveRecipeLibraryTest(TestCase):
+    def test_read_write(self):
+        # No need to include Arg and glycerol in library since existing chemical are only checked for if concentration is in molar.
+        with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value = {"salt" : None, "pepper" : None}):
+            temp_file = NamedTemporaryFile("w+")
+
+            file_contents = "wash 300mM salt 4M pepper\nelution 5g Arg 20% glycerol\n"
+            with open(temp_file.name, "w") as file:
+                file.write(file_contents)
+
+            with mock.patch("buf.commands.recipe.recipe_library_file", temp_file.name):
+                read_recipe_dict = recipe.load_recipes()
+
+                recipe.save_recipe_library(read_recipe_dict)
+
+                read_again = recipe.load_recipes()
+
+                self.assertEqual(read_recipe_dict, read_again)
+
+class TestDeleteRecipe(TestCase):
+
+    def test_errors(self):
+
+        with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value = {"salt" : None, "pepper" : None}):
+            with mock.patch("buf.commands.recipe.print") as mock_print:
+                with self.assertRaises(SystemExit):
+                    recipe.delete_recipe("unknown_recipe")
+                    mock_print.assert_called()
+
+    def test_delete(self):
+        with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={"salt": None, "pepper": None}):
+
+            temp_file = NamedTemporaryFile("w+")
+
+            test_buffer_a = recipe.Recipe("buffer_a", ["300mM", "10L"], ["salt", "pepper"])
+            test_buffer_b = recipe.Recipe("buffer_b", ["4ug", ".5M"], ["solute", "salt"])
+
+            initial_library = {"buffer_a" : test_buffer_a, "buffer_b" : test_buffer_b}
+
+            after_delete = {"buffer_b": test_buffer_b}
+
+            with mock.patch("buf.commands.recipe.recipe_library_file", temp_file.name):
+                recipe.save_recipe_library(initial_library)
+
+                recipe.delete_recipe("buffer_a", prompt_for_confirmation=False)
+
+                self.assertEqual(after_delete, recipe.load_recipes())
