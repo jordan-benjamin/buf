@@ -168,3 +168,52 @@ class NickNameTest(TestCase):
             new_dict = chemical.load_chemicals()
 
             self.assertEqual(read_chemical_dict, new_dict)
+
+class TestDeleteChemical(TestCase):
+
+    def test_errors(self):
+
+        with mock.patch("buf.commands.chemical.load_chemicals", return_value = {"salt" : None, "pepper" : None}):
+            with mock.patch("buf.commands.chemical.print") as mock_print:
+                with self.assertRaises(SystemExit):
+                    chemical.delete_chemical("unknown_chemical")
+                    mock_print.assert_called()
+
+    def test_complete_delete(self):
+
+        temp_file = NamedTemporaryFile("w+")
+
+        test_salt_and_pepper = chemical.Chemical(200, ["salt", "pepper"])
+        test_kcl = chemical.Chemical(123.4, ["KCl"])
+
+        initial_library = {"salt" : test_salt_and_pepper, "pepper" : test_salt_and_pepper, "KCl" : test_kcl}
+
+        after_delete = {"KCl": test_kcl}
+
+        with mock.patch("buf.commands.chemical.chemical_library_file", temp_file.name):
+            chemical.save_chemical_library(initial_library)
+
+            chemical.delete_chemical("salt", complete_deletion=True, prompt_for_confirmation=False)
+
+            self.assertEqual(after_delete, chemical.load_chemicals())
+
+    def test_incomplete_delete(self):
+
+        temp_file = NamedTemporaryFile("w+")
+
+        test_salt_and_pepper = chemical.Chemical(200, ["salt", "pepper"])
+        test_kcl = chemical.Chemical(123.4, ["KCl"])
+
+        test_pepper = chemical.Chemical(200, ["pepper"])
+
+        initial_library = {"salt" : test_salt_and_pepper, "pepper" : test_salt_and_pepper, "KCl" : test_kcl}
+
+        after_delete = {"KCl": test_kcl, "pepper" : test_pepper}
+
+        with mock.patch("buf.commands.chemical.chemical_library_file", temp_file.name):
+            chemical.save_chemical_library(initial_library)
+
+            chemical.delete_chemical("salt", complete_deletion=False, prompt_for_confirmation=False)
+
+            self.assertEqual(after_delete, chemical.load_chemicals())
+

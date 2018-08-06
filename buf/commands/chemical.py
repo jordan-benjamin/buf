@@ -10,6 +10,7 @@ import tabulate
 
 from sys import exit
 
+from buf import user_input
 
 instructions = """buf chemical:
 
@@ -128,6 +129,7 @@ def add_chemicals_from_file(filename : str):
         for new_chemical in new_chemical_objects:
             file.write(str(new_chemical) + "\n")
 
+    # TODO: delete this?
     print(f"Added the following chemicals to your library:", *new_chemical_names)
 
 def save_chemical_library(chemical_library: dict):
@@ -216,5 +218,37 @@ def nickname_chemical(existing_chemical_name: str, new_name: str):
     chemical_object = chemical_library[existing_chemical_name]
 
     chemical_object.names.append(new_name)
+
+    save_chemical_library(chemical_library)
+
+
+# TODO: print out to user that the chemicals have been deleted?
+def delete_chemical(chemical_name: str, complete_deletion: bool = False, prompt_for_confirmation: bool = True):
+    chemical_library = load_chemicals()
+
+    if chemical_name not in chemical_library:
+        print(f"Chemical not found: '{chemical_name}' not found in chemical library.")
+        exit()
+
+    chemical_object = chemical_library[chemical_name]
+
+    if complete_deletion:
+        names = chemical_object.names
+
+        if prompt_for_confirmation:
+            print("You are about to delete the following chemicals from your library:", *names)
+            user_input.confirm()
+
+        for name in names:
+            del(chemical_library[name])
+
+    else:
+
+        if prompt_for_confirmation:
+            print(f"You are about to delete '{chemical_name}' from your chemical library.")
+            user_input.confirm()
+
+        chemical_object.names.remove(chemical_name)
+        del(chemical_library[chemical_name])
 
     save_chemical_library(chemical_library)
