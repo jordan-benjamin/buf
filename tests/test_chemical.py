@@ -13,9 +13,9 @@ class MakeSafeChemicalTest(TestCase):
 
     def test_molar_mass_check(self):
         with mock.patch("buf.commands.chemical.print") as mock_print:
-            for test_molar_mass in [0, -10, "not a number"]:
+            for test_molar_mass in [0, -10, "notanumber"]:
                 with self.assertRaises(SystemExit):
-                    chemical.make_safe_chemical(test_molar_mass, ["valid name"], {})
+                    chemical.make_safe_chemical(test_molar_mass, ["validname"],chemical_library={})
                     mock_print.assert_called()
                     mock_print.reset_mock()
 
