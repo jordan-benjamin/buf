@@ -143,7 +143,7 @@ class NickNameTest(TestCase):
             with mock.patch("buf.commands.chemical.print") as mock_print:
                 for existing_name, new_name in [("unknown", "nickname"), ("NaCl", "Arg"), ("NaCl", "NaCl")]:
                     with self.assertRaises(SystemExit):
-                        chemical.nickname_chemical(existing_name, new_name)
+                        chemical.nickname_chemical(existing_name, ["Arg", new_name])
                         mock_print.assert_called()
                     mock_print.reset_mock()
 
@@ -159,11 +159,13 @@ class NickNameTest(TestCase):
 
             chemical_object = read_chemical_dict["salt"]
 
-            chemical_object.names.append("newname")
+            chemical_object.names.append("new_name_1")
+            chemical_object.names.append("new_name_2")
 
-            read_chemical_dict["newname"] = chemical_object
+            read_chemical_dict["new_name_1"] = chemical_object
+            read_chemical_dict["new_name_2"] = chemical_object
 
-            chemical.nickname_chemical("salt", "newname")
+            chemical.nickname_chemical("salt", ["new_name_1", "new_name_2"])
 
             new_dict = chemical.load_chemicals()
 

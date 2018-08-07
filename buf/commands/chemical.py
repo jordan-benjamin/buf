@@ -204,20 +204,22 @@ def reset():
     with open(chemical_library_file, "w") as file:
         pass
 
-def nickname_chemical(existing_chemical_name: str, new_name: str):
+# TODO: change type hinting to sequence of strings.
+def nickname_chemical(existing_chemical_name: str, new_names: list):
     chemical_library = load_chemicals()
 
     if existing_chemical_name not in chemical_library:
         print(f"Name error: '{existing_chemical_name}' does not exist in chemical library.")
         exit()
 
-    if new_name in chemical_library:
-        print(f"Name error: '{new_name}' already exists in chemical library.")
-        exit()
+    for new_name in new_names:
+        if new_name in chemical_library:
+            print(f"Name error: '{new_name}' already exists in chemical library.")
+            exit()
 
     chemical_object = chemical_library[existing_chemical_name]
 
-    chemical_object.names.append(new_name)
+    chemical_object.names += new_names
 
     save_chemical_library(chemical_library)
 
