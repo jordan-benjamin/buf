@@ -21,6 +21,7 @@ docstring = """
 buf
 
 Usage:
+    buf help
     buf help <subcommand_name>
     buf chemical
     buf chemical <chemical_name>
