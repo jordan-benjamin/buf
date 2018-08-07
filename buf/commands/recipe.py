@@ -27,14 +27,15 @@ cases."""
 
 recipe_library_file = os.path.join(os.path.dirname(__file__), "../library/recipes.txt")
 
-# Casting a dictionary to a list returns a list of its keys.
-
-
+# TODO: raise error if none of the options specified work (i.e. an else at the bottom of the method)?
 def recipe(options):
     if options["-a"] == True:
-        add_single_recipe(options["<recipe_name>"], options["<concentration>"], options["<chemical_name>"])
+        add_single_recipe(options["<recipe_name>"], options["<concentrations>"], options["<chemical_names>"])
+    elif options["-d"] == True:
+        delete_recipe(options["<recipe_name>"], options["--confirm"])
     elif options["<recipe_name>"]:
         display_recipe_information(options["<recipe_name>"])
+
 
 def make_safe_recipe(name, concentrations, chemical_names, chemical_library = None, recipe_library = None):
 

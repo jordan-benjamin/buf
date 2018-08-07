@@ -6,13 +6,16 @@ from docopt import docopt
 
 import sys
 
+from tempfile import NamedTemporaryFile
+
 if __name__ == '__main__':
     import commands
 else:
     import buf.commands as commands
 
-# TODO: add nicknaming.
-
+# TODO: is "confirm" the right name for the option that skips checking if the user is sure? Maybe --skip-check or something?
+# TODO: write a better help docstring for when someone types "buf help"
+# TODO: create some sort of display_recipe_library option?
 docstring = """
 buf
 
@@ -21,10 +24,15 @@ Usage:
     buf chemical
     buf chemical <chemical_name>
     buf chemical -a <molar_mass> <chemical_names>...
+    buf chemical -a <file_name>
+    buf chemical -n <existing_chemical_name> <nicknames>...
+    buf chemical -d <chemical_name> [--complete] [--confirm]
     buf recipe <recipe_name>
-    buf recipe -a <recipe_name> (<concentration> <chemical_name>)...
+    buf recipe -a <recipe_name> (<concentrations> <chemical_names>)...
+    buf recipe -a <file_name>
+    bur recipe -d <recipe_name> [--confirm]
     buf make <volume> <recipe_name>
-    buf make <volume> (<concentration> <chemical_name>)...
+    buf make <volume> (<concentrations> <chemical_names>)...
 """
 
 def main():
@@ -44,21 +52,3 @@ def line(string):
 def reset():
     commands.chemical.reset()
     commands.recipe.reset()
-
-reset()
-
-line("buf help recipe")
-line("buf chemical -a 154.25 DTT")
-line("buf chemical -a 58.44 NaCl")
-line("buf chemical -a 68.08 imidazole")
-line("buf chemical -a 121.1 tris")
-line(("buf chemical -a 74.55 KCl"))
-line("buf chemical -a 210.66 Arginine Arg")
-line("buf chemical -a 238.3 HEPES")
-line("buf chemical -a 10 glycerol")
-line("buf recipe -a wash 300mM NaCl 50mM tris 20mM imidazole")
-line("buf recipe -a elution 50mM tris 300mM KCl 500mM imidazole")
-line("buf recipe -a refold 50mM HEPES 250mM KCl 500mM Arg 10mM DTT 20% glycerol")
-line("buf make 100mL refold")
-
-

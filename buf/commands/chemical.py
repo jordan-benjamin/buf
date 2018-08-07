@@ -25,16 +25,18 @@ chemical library, both with the same molar mass."""
 chemical_library_file = os.path.join(os.path.dirname(__file__), "../library/chemicals.txt")
 
 def chemical(options : dict):
-
     if options["-a"]:
         if options["<file_name>"]:
             add_chemicals_from_file(options["<file_name>"])
         else:
             add_single_chemical(options["<molar_mass>"], options["<chemical_names>"])
-
+    elif options["-d"]:
+        # TODO: is it better to have a skip confirmation opposed to a prompt for it?
+        delete_chemical(options["<chemical_name>"], complete_deletion=options["--complete"], prompt_for_confirmation= not options["--confirm"])
+    elif options["-n"]:
+        nickname_chemical(options["<existing_chemical_name>"], options["<nicknames>"])
     elif options["<chemical_name>"]:
         display_chemical_information(options["<chemical_name>"])
-
     else:
         display_chemical_library()
 

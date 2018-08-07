@@ -28,7 +28,7 @@ def make(options):
     if options["<recipe_name>"]:
         recipe_object = get_recipe(options["<recipe_name>"])
     else:
-        recipe_object = recipe.make_safe_recipe("", options["<concentration>"], options["<chemical_name>"], recipe_library= {})
+        recipe_object = recipe.make_safe_recipe("temp", options["<concentrations>"], options["<chemical_names>"], recipe_library= {})
 
     buffer_volume_in_litres = get_buffer_litres(options["<volume>"])
 
