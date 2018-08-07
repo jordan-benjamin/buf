@@ -16,6 +16,7 @@ else:
 # TODO: is "confirm" the right name for the option that skips checking if the user is sure? Maybe --skip-check or something?
 # TODO: write a better help docstring for when someone types "buf help"
 # TODO: create some sort of display_recipe_library option?
+# TODO: add buf reset
 docstring = """
 buf
 
@@ -30,7 +31,7 @@ Usage:
     buf recipe <recipe_name>
     buf recipe -a <recipe_name> (<concentrations> <chemical_names>)...
     buf recipe -a <file_name>
-    bur recipe -d <recipe_name> [--confirm]
+    buf recipe -d <recipe_name> [--confirm]
     buf make <volume> <recipe_name>
     buf make <volume> (<concentrations> <chemical_names>)...
 """
