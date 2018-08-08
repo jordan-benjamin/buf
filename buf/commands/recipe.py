@@ -4,31 +4,36 @@
 
 from buf import unit, user_input
 from buf.commands import chemical
-
 from sys import exit
-
+from typing import Sequence
 import os
 
-# TODO: format nicely.
-# TODO: is the constant volume/mass thing even a good idea?
 instructions = """buf recipe:
 
-This subcommand allows you to access and modify your recipe library. A recipe is a list of 
-chemical names preceded by their concentrations, for example '300mM NaCl 4M Arginine'.
+This subcommand allows you to access and modify your recipe library. A recipe is a description of the \
+contents of a buffer or solution. It takes the form of a list of chemical names preceded by their concentrations, \
+for example '300mM NaCl 10% glycerol'.
 
-To add a recipe to your library, use 'buf recipe -a <recipe_name> (<concentration> <chemical_name>)...'.
-For example, to add the recipe specified above, use 'buf recipe -a my_recipe 300mM NaCl 4M Arginine'.
+Chemical concentrations can be specified in a number of ways. One common method, shown in the example above, is \
+with molarity. Note that before one can specify a chemical's concentration in molar, that chemical's molar mass must \
+first be added to your chemical library (see 'buf help chemical' for more information). Alternatively, one can specify \
+a concentration of a chemical to be a percentage of the total volume of solution, shown above with '10% glycerol'. Lastly, \
+if you want a constant mass or volume of a chemical to be added to the solution, no matter its volume, you can specify that \
+constant amount in the recipe (e.g. '10g KCl'). When using these non-molar concentration, the chemical being listed does not \
+need to exist in your library.
+
+To add a recipe to your library, use 'buf recipe -a <recipe_name> (<concentration> <chemical_name>)...'. \
+For example, to add the recipe specified above, use 'buf recipe -a my_recipe 300mM NaCl 10% glycerol'.
  
-Chemical concentrations can be specified in a number of ways. In addition to specifying molarity
-(e.g. '300mM NaCl'), you can specify a percentage of solution, for example '10% glycerol'.
-Furthermore, you can specify a constant mass or volume, to be added to the buffer regardless of 
-its volume. For example, specifying '10g NaCl' will result in 10g of NaCl being added to the buffer in all
-cases."""
+To delete a recipe, use 'buf recipe -d <recipe_name>'. To skip the program asking you to confirm your decision, use \
+the '--confirm' option.
+
+To view the contents of a recipe, use 'buf recipe <chemical_name>'."""
 
 recipe_library_file = os.path.join(os.path.dirname(__file__), "../library/recipes.txt")
 
 # TODO: raise error if none of the options specified work (i.e. an else at the bottom of the method)?
-def recipe(options):
+def recipe(options: dict):
     if options["-a"] == True:
         add_single_recipe(options["<recipe_name>"], options["<concentrations>"], options["<chemical_names>"])
     elif options["-d"] == True:
@@ -36,8 +41,12 @@ def recipe(options):
     elif options["<recipe_name>"]:
         display_recipe_information(options["<recipe_name>"])
 
+# --------------------------------------------------------------------------------
+# ----------------------------RECIPE DEFINITION AND CREATION----------------------
+# --------------------------------------------------------------------------------
 
-def make_safe_recipe(name, concentrations, chemical_names, chemical_library = None, recipe_library = None):
+def make_safe_recipe(name: str, concentrations: Sequence[str], chemical_names : Sequence[str],
+                     chemical_library: dict = None, recipe_library: dict = None):
 
     if chemical_library == None:
         chemical_library = chemical.load_chemicals()
@@ -80,36 +89,21 @@ def make_safe_recipe(name, concentrations, chemical_names, chemical_library = No
 
     return Recipe(name, concentrations, chemical_names)
 
-def display_recipe_information(recipe_name):
-    recipe_library = load_recipes()
-
-    if recipe_name not in recipe_library:
-        print(f"Invalid recipe name: '{recipe_name}' not in recipe library.")
-        exit()
-
-    recipe_object = recipe_library[recipe_name]
-
-    print(f"Recipe name: {recipe_object.name}")
-    print(f"Contents: {recipe_object.get_contents()}")
-
-
 class Recipe:
-    def __init__(self, name, concentrations, chemical_names):
+    def __init__(self, name: str, concentrations: Sequence[str], chemical_names: Sequence[str]):
 
         self.name = name
         self.concentrations = concentrations
         self.chemical_names = chemical_names
 
-    # TODO: better way of getting rid of the initial space than slicing.
     def get_contents(self):
-        string = ""
-        for concentration, chemical_name in zip(self.concentrations, self.chemical_names):
+        string = f"{self.concentrations[0]} {self.chemical_names[0]}"
+        for concentration, chemical_name in zip(self.concentrations[1:], self.chemical_names[1:]):
             string += f" {concentration} {chemical_name}"
-        return string[1:]
+        return string
 
     def __str__(self):
-        string = self.name + " " + self.get_contents()
-        return string
+        return self.name + " " + self.get_contents()
 
     # TODO: two recipes that have the same ingredients and concentrations, but in different orders, should be equal.
     def __eq__(self, other):
@@ -117,31 +111,12 @@ class Recipe:
                other.concentrations and self.chemical_names == other.chemical_names
 
 
-def load_recipes():
-    # TODO: what if someone manually mucks up the file? check for corruption?
-    recipes = {}
-    chemical_library = chemical.load_chemicals()
 
-    with open(recipe_library_file, "r") as file:
-        for line in file:
+# --------------------------------------------------------------------------------
+# ----------------------------------ADDING RECIPES--------------------------------
+# --------------------------------------------------------------------------------
 
-            words = line.split()
-
-            name = words[0]
-            concentrations = []
-            chemical_names = []
-
-            for index in range(1, len(words[1:]), 2):
-                concentrations.append(words[index])
-                chemical_names.append(words[index+1])
-
-            recipe = make_safe_recipe(name, concentrations, chemical_names, chemical_library=chemical_library, recipe_library=recipes)
-            recipes[name] = recipe
-
-    return recipes
-
-
-def add_single_recipe(name, concentrations, chemical_names):
+def add_single_recipe(name: str, concentrations: Sequence[str], chemical_names: Sequence[str]):
 
     new_recipe = make_safe_recipe(name, concentrations, chemical_names)
 
@@ -204,10 +179,61 @@ def add_recipes_from_file(filename : str):
 
     print(f"Added the following recipes to your library:", *list(new_recipe_library.keys()))
 
+# --------------------------------------------------------------------------------
+# --------------------------------DISPLAYING RECIPES------------------------------
+# --------------------------------------------------------------------------------
+
+def display_recipe_information(recipe_name: str):
+    recipe_library = load_recipes()
+
+    if recipe_name not in recipe_library:
+        print(f"Invalid recipe name: '{recipe_name}' not in recipe library.")
+        exit()
+
+    recipe_object = recipe_library[recipe_name]
+
+    print(f"Recipe name: {recipe_object.name}")
+    print(f"Contents: {recipe_object.get_contents()}")
+
+# --------------------------------------------------------------------------------
+# --------------------------READING/WRITING TO RECIPE LIBRARY---------------------
+# --------------------------------------------------------------------------------
+
+def load_recipes():
+    # TODO: what if someone manually mucks up the file? check for corruption?
+    recipes = {}
+    chemical_library = chemical.load_chemicals()
+
+    with open(recipe_library_file, "r") as file:
+        for line in file:
+
+            words = line.split()
+
+            name = words[0]
+            concentrations = []
+            chemical_names = []
+
+            for index in range(1, len(words[1:]), 2):
+                concentrations.append(words[index])
+                chemical_names.append(words[index+1])
+
+            recipe = make_safe_recipe(name, concentrations, chemical_names, chemical_library=chemical_library, recipe_library=recipes)
+            recipes[name] = recipe
+
+    return recipes
+
 def save_recipe_library(recipe_library: dict):
     with open(recipe_library_file, "w") as file:
         for recipe_object in recipe_library.values():
             file.write(str(recipe_object) + "\n")
+
+def reset():
+    with open(recipe_library_file, "w") as file:
+        pass
+
+# --------------------------------------------------------------------------------
+# -------------------------------DELETING RECIPES---------------------------------
+# --------------------------------------------------------------------------------
 
 def delete_recipe(recipe_name: str, prompt_for_confirmation: bool = True):
     recipe_library = load_recipes()
@@ -223,6 +249,3 @@ def delete_recipe(recipe_name: str, prompt_for_confirmation: bool = True):
 
     save_recipe_library(recipe_library)
 
-def reset():
-    with open(recipe_library_file, "w") as file:
-        pass
