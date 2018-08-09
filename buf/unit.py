@@ -124,11 +124,9 @@ class UnitLadder:
 # NOTE: This method does NOT do any type checking.
 def split_unit_quantity(string):
     # TODO: look into settings to find default unit if not specified.
-    # TODO: handle bad inputs (no quantity or only ".")
-    # TODO: check for valid unit (have list of acceptable units)
     quantity = ""
     index = 0
-    quantity_characters = [str(num) for num in range(10)] + ["."]
+    quantity_characters = [str(num) for num in range(10)] + [".", "-"]
     for character in string:
         if character in quantity_characters:
             quantity+= character
