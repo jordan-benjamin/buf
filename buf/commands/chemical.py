@@ -6,6 +6,7 @@ import os
 import tabulate
 from sys import exit
 from buf import user_input
+from typing import Sequence
 
 instructions = """buf chemical:
 
@@ -56,7 +57,6 @@ def chemical(options : dict):
         else:
             add_single_chemical(options["<molar_mass>"], options["<chemical_names>"])
     elif options["-d"]:
-        # TODO: is it better to have a skip confirmation opposed to a prompt for it?
         delete_chemical(options["<chemical_name>"], complete_deletion=options["--complete"], prompt_for_confirmation= not options["--confirm"])
     elif options["-n"]:
         nickname_chemical(options["<existing_chemical_name>"], options["<nicknames>"])
@@ -70,12 +70,11 @@ def chemical(options : dict):
 # --------------------------------------------------------------------------------
 
 class Chemical:
-    def __init__(self, molar_mass: float, names: list):
+    def __init__(self, molar_mass: float, names: Sequence[str]):
         self.molar_mass = molar_mass
         self.names = names
 
     def __repr__(self):
-        # TODO: replace the name code with list_print
         string = str(self.molar_mass)
         for name in self.names:
             string += " " + name
@@ -111,19 +110,22 @@ def make_safe_chemical(molar_mass : str, names : list, chemical_library: dict = 
 # --------------------------------ADDING CHEMICALS--------------------------------
 # --------------------------------------------------------------------------------
 
-def add_single_chemical(molar_mass: str, names: list):
+def add_single_chemical(molar_mass: str, names: Sequence[str]):
     new_chemical = make_safe_chemical(molar_mass, names)
     with open(chemical_library_file, "a") as file:
         file.write(str(new_chemical) + "\n")
 
-# TODO: what's better practice? reading file lines then getting out, or iterating through the file inside the context manager?
 def add_chemicals_from_file(filename : str):
+    if os.path.isfile(filename) == False:
+        print(f"File not found: '{filename}' could not be located.'")
+        exit()
+
     try:
         with open(filename, "r") as file:
             lines = file.readlines()
     except:
-        # TODO: tell user to specify absolute path / go to the right directory?
-        print(f"File not found: '{filename}' could not be located.")
+        print(f"File read error: '{filename}' could not be read.")
+        exit()
 
     existing_chemical_library = load_chemicals()
 
@@ -165,11 +167,10 @@ def add_chemicals_from_file(filename : str):
     print(f"Added the following chemicals to your library:", *new_chemical_names)
 
 # --------------------------------------------------------------------------------
-# ----------------------READING/WRITING TO CHEMICAL LIBRARY-----------------------
+# -------------------------NICKNAMING/DELETING CHEMICALS--------------------------
 # --------------------------------------------------------------------------------
 
-# TODO: change type hinting to sequence of strings.
-def nickname_chemical(existing_chemical_name: str, new_names: list):
+def nickname_chemical(existing_chemical_name: str, new_names: Sequence[str]):
     chemical_library = load_chemicals()
 
     if existing_chemical_name not in chemical_library:
@@ -187,7 +188,6 @@ def nickname_chemical(existing_chemical_name: str, new_names: list):
 
     save_chemical_library(chemical_library)
 
-# TODO: print out to user that the chemicals have been deleted?
 def delete_chemical(chemical_name: str, complete_deletion: bool = False, prompt_for_confirmation: bool = True):
     chemical_library = load_chemicals()
 
@@ -219,7 +219,7 @@ def delete_chemical(chemical_name: str, complete_deletion: bool = False, prompt_
     save_chemical_library(chemical_library)
 
 # --------------------------------------------------------------------------------
-# ------------------------NICKNAMING AND DELETING CHEMICALS-----------------------
+# ------------------------READING/WRITING TO CHEMICAL LIBRARY---------------------
 # --------------------------------------------------------------------------------
 
 def save_chemical_library(chemical_library: dict):
@@ -258,22 +258,22 @@ def reset():
 # -----------------------------DISPLAYING CHEMICALS-------------------------------
 # --------------------------------------------------------------------------------
 
-
 def display_chemical_information(chemical_name: str):
     chemical_library = load_chemicals()
     if chemical_name in chemical_library:
         chemical = chemical_library[chemical_name]
-        # TODO: fancy display
+
         print(f"Chemical name: {chemical_name}")
 
-        # TODO: comment this line
-        # TODO: print blank other names line if no other names, or omit line altogether?
-        other_names = [item for item in chemical.names if item != chemical_name]
-        if len(other_names) != 0:
-            other_names_string = other_names[0]
+        other_names = [name for name in chemical.names if name != chemical_name]
+        if len(other_names) == 0:
+            other_names_string = ""
+        else:
+            other_names_string = str(other_names[0])
             for other_name in other_names[1:]:
                 other_names_string += ", " + other_name
-            print(f"Other names: {other_names_string}")
+
+        print(f"Other names: {other_names_string}")
 
         print(f"Molar mass: {chemical.molar_mass}")
 
@@ -284,15 +284,17 @@ def display_chemical_information(chemical_name: str):
 
 
 def display_chemical_library():
-    chemicals = load_chemicals()
 
-    # TODO: delete this line?
-    print("The chemicals in your library are:\n")
+    chemical_library = load_chemicals()
+
+    print("The chemicals in your library are:")
 
     table = []
 
-    # TODO: is it more efficient to use dict.items than this?
-    for chemical_name in chemicals:
-        table.append([chemical_name, chemicals[chemical_name].molar_mass])
+    for chemical_name, chemical_object in chemical_library.items():
+        table.append((chemical_name, chemical_object.molar_mass))
+
+    # Key is the chemical's name (the first item in each tuple in the list)
+    table.sort(key=lambda entry: entry[0])
 
     print(tabulate.tabulate(table, headers=["Chemical Name", "Molar Mass"], tablefmt="fancy_grid"))
