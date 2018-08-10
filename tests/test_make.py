@@ -30,7 +30,7 @@ class CalculateAmountToAddTest(TestCase):
         for buffer_volume in range(1,10):
             for symbol in ["ug", "µg", "mg", "g", "µL", "uL", "mL", "L"]:
                 for input in inputs:
-                    self.assertEqual(unit.scale_and_round_unit_quantity(input, symbol),
+                    self.assertEqual(unit.scale_and_round_physical_quantity(input, symbol),
                                      make.calculate_amount_to_add(buffer_volume, str(input)+symbol, "chemical_name", {}))
 
     def test_percent_volume(self):
@@ -39,7 +39,7 @@ class CalculateAmountToAddTest(TestCase):
 
         for buffer_volume in range(1,10):
             for input in inputs:
-                self.assertEqual(unit.scale_and_round_unit_quantity(input*buffer_volume/100, "L"),
+                self.assertEqual(unit.scale_and_round_physical_quantity(input * buffer_volume / 100, "L"),
                                  make.calculate_amount_to_add(buffer_volume, str(input)+"%", "chemical_name", {}))
 
     def test_molarity_units(self):
@@ -52,7 +52,7 @@ class CalculateAmountToAddTest(TestCase):
 
         for buffer_volume in range(1,10):
             for input in inputs:
-                self.assertEqual(unit.scale_and_round_unit_quantity(58.44 * buffer_volume * input, "g"),
+                self.assertEqual(unit.scale_and_round_physical_quantity(58.44 * buffer_volume * input, "g"),
                                  make.calculate_amount_to_add(buffer_volume, str(input)+"M", "NaCl", chemical_library))
 
 
@@ -67,7 +67,7 @@ class BufferInstructionsTest(TestCase):
         with mock.patch("buf.commands.make.chemical.load_chemicals", return_value = {"NaCl" : nacl, "KCl" : kcl}):
             test_buffer_instructions = make.BufferInstructions(2, test_recipe)
 
-            correct_steps = [make.Step("NaCl", "300mM", unit.scale_and_round_unit_quantity(58.44 * 0.3 * 2, "g")),
+            correct_steps = [make.Step("NaCl", "300mM", unit.scale_and_round_physical_quantity(58.44 * 0.3 * 2, "g")),
                              make.Step("KCl", "4g", "4.0g")]
 
             self.assertEqual(test_buffer_instructions.steps, correct_steps)

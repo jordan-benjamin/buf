@@ -75,15 +75,15 @@ class ScaleAndRoundUnitQuantityTest(TestCase):
 
     def test_scaling(self):
 
-        self.assertEqual(unit.scale_and_round_unit_quantity(0.1, "L"), "100.0mL")
-        self.assertEqual(unit.scale_and_round_unit_quantity(10 * 1e-6, "M"), "10.0µM")
-        self.assertEqual(unit.scale_and_round_unit_quantity(1000, "mg"), "1.0g")
+        self.assertEqual(unit.scale_and_round_physical_quantity(0.1, "L"), "100.0mL")
+        self.assertEqual(unit.scale_and_round_physical_quantity(10 * 1e-6, "M"), "10.0µM")
+        self.assertEqual(unit.scale_and_round_physical_quantity(1000, "mg"), "1.0g")
 
-        self.assertEqual(unit.scale_and_round_unit_quantity(1.0, "mg"), "1.0mg")
+        self.assertEqual(unit.scale_and_round_physical_quantity(1.0, "mg"), "1.0mg")
 
     # TODO: needs to be updated when settings are added / custom rounding.
     def test_rounding(self):
 
-        self.assertEqual(unit.scale_and_round_unit_quantity(123.456, "L"), "123.46L")
-        self.assertEqual(unit.scale_and_round_unit_quantity(0.123456, "L"), "123.46mL")
-        self.assertEqual(unit.scale_and_round_unit_quantity(10089, "µL"), "10.09mL")
+        self.assertEqual(unit.scale_and_round_physical_quantity(123.456, "L"), "123.46L")
+        self.assertEqual(unit.scale_and_round_physical_quantity(0.123456, "L"), "123.46mL")
+        self.assertEqual(unit.scale_and_round_physical_quantity(10089, "µL"), "10.09mL")
