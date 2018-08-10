@@ -4,9 +4,13 @@
 
 import sys
 import inspect
+from buf import commands
+from buf import error_messages
 
-# TODO: find a way to put this module into the list. Add to members maybe?
-# TODO: create general docstring for when 'buf help' is called.
+# TODO: complete.
+instructions = """buf help:
+
+ADD TO THIS."""
 
 general_help_docstring = """
 
@@ -46,23 +50,18 @@ buf make:
 For detailed about a specific subcommand, use 'buf help <subcommand_name>'.
 """
 
-from buf.commands import chemical, make, recipe
-
 def help(options):
     if options["<subcommand_name>"]:
         subcommand = options["<subcommand_name>"]
-        this_module = sys.modules[__name__]
 
-        members = inspect.getmembers(this_module, inspect.ismodule)
-
-        if hasattr(this_module, subcommand):
-            module = getattr(this_module, subcommand)
+        if hasattr(commands, subcommand):
+            module = getattr(commands, subcommand)
 
             instructions = module.instructions
 
             print(instructions)
-
         else:
-            print(f"Invalid subcommand name: '{subcommand}' is not a valid subcommand.'")
+            error_messages.subcommand_not_found(subcommand)
+
     else:
         print(general_help_docstring)
