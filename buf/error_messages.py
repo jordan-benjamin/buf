@@ -2,10 +2,10 @@
 # Author: Jordan Juravsky
 # Date created: 08-08-2018
 
-# TODO: should this module be named error_messages or errors?
+"""Descriptive error messages that use sys.exit to cleanly end the program without displaying a traceback."""
 
 from sys import exit
-from buf.unit import valid_units
+from buf import unit
 
 # --------------------------------------------------------------------------------
 # -----------------------------------CHEMICAL ERRORS------------------------------
@@ -57,7 +57,7 @@ def recipe_already_exists(recipe_name: str):
     exit()
 
 def invalid_concentration_unit(unit: str):
-    print("Invalid unit: '" + str(unit) + "' is not a valid unit. Valid units are:", *valid_units)
+    print("Invalid unit: '" + str(unit) + "' is not a valid unit. Valid units are:", *unit.valid_units)
     exit()
 
 def non_number_concentration_magnitude(magnitude: str):
@@ -104,6 +104,26 @@ def non_positive_buffer_volume_magnitude(magnitude: float):
 def subcommand_not_found(subcommand: str):
     print("Subcommand not found: '" + str(subcommand) + "' is not a valid subcommand.",
           "For an overview of all subcommands, see 'buf help'.")
+    exit()
+
+# --------------------------------------------------------------------------------
+# -----------------------------------UNIT ERRORS----------------------------------
+# --------------------------------------------------------------------------------
+
+def unit_not_in_ladder(symbol: str):
+    print("Invalid unit: '" + str(symbol) + "' not in ladder.")
+    exit()
+
+def unit_not_in_any_ladder(symbol: str):
+    print("Invalid unit: '" + str(symbol) + "' not in any unit ladder.")
+    exit()
+
+def no_greater_unit_in_ladder(symbol: str):
+    print("No greater unit: '" + str(symbol) + "' is the largest unit in its ladder.")
+    exit()
+
+def no_lesser_unit_in_ladder(symbol: str):
+    print("No lesser unit: '" + str(symbol) + "' is the smallest unit in its ladder.")
     exit()
 
 # --------------------------------------------------------------------------------
