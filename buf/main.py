@@ -3,18 +3,14 @@
 # Date created: 26-07-2018
 
 from docopt import docopt
-
 import sys
-
-from tempfile import NamedTemporaryFile
 
 if __name__ == '__main__':
     import commands
 else:
     import buf.commands as commands
 
-# TODO: is "confirm" the right name for the option that skips checking if the user is sure? Maybe --skip-check or something?
-# TODO: write a better help docstring for when someone types "buf help"
+
 # TODO: create some sort of display_recipe_library option?
 # TODO: add buf reset
 docstring = """
@@ -35,6 +31,8 @@ Usage:
     buf recipe -d <recipe_name> [--confirm]
     buf make <volume> <recipe_name>
     buf make <volume> (<concentrations> <chemical_names>)...
+
+For more information, see 'buf help' or 'buf help <subcommand_name>'.
 """
 
 def main():
