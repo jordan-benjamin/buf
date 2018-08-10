@@ -83,7 +83,7 @@ class Chemical:
     def __eq__(self, other):
         return self.molar_mass == other.molar_mass and set(self.names) == set(other.names)
 
-# TODO: make sure names cannot be whitespace.
+
 def make_safe_chemical(molar_mass : str, names : list, chemical_library: dict = None):
     if chemical_library == None:
         chemical_library = load_chemicals()
@@ -91,6 +91,9 @@ def make_safe_chemical(molar_mass : str, names : list, chemical_library: dict = 
     for name in names:
         if name in chemical_library:
             error_messages.chemical_already_exists(name)
+
+        if " " in name:
+            error_messages.spaces_in_chemical_name(name)
 
     try:
         molar_mass = float(molar_mass)

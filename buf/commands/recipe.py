@@ -64,10 +64,11 @@ def make_safe_recipe(name: str, concentrations: Sequence[str], chemical_names : 
     if recipe_library == None:
         recipe_library = load_recipes()
 
-    # TODO: check if name is blank? will docopt let that happen?
-    # TODO: ensure that docopt with guarantee that the lengths of concentrations and chemical_names are the same.
     if name in recipe_library:
         error_messages.recipe_already_exists(name)
+
+    if " " in name:
+        error_messages.spaces_in_recipe_name(name)
 
     for concentration, chemical_name in zip(concentrations, chemical_names):
 

@@ -14,6 +14,13 @@ from buf.commands import recipe
 
 class MakeRecipeTest(TestCase):
 
+    def test_spaces_in_name(self):
+        with mock.patch("buf.commands.recipe.load_recipes", return_value = {}):
+            with self.assertRaises(SystemExit):
+                should_crash = recipe.make_safe_recipe("contains spaces", ["10%"], ["glycerol"])
+
+            shouldnt_crash = recipe.make_safe_recipe("doesnt_contain_spaces", ["10%"], ["glycerol"])
+
     def test_existing_chemical_check(self):
 
             with mock.patch("buf.commands.recipe.print") as mock_print:

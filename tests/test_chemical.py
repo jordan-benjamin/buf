@@ -11,6 +11,13 @@ from tempfile import NamedTemporaryFile
 
 class MakeSafeChemicalTest(TestCase):
 
+    def test_spaces_in_name(self):
+        with mock.patch("buf.commands.chemical.load_chemicals", return_value = {}):
+            with self.assertRaises(SystemExit):
+                should_crash = chemical.make_safe_chemical("58.44", ["NaCl", "table salt with spaces"])
+
+            shouldnt_crash = chemical.make_safe_chemical("58.44", ["NaCl", "table_salt_without_spaces"])
+
     def test_molar_mass_check(self):
         with mock.patch("buf.commands.chemical.print") as mock_print:
             for test_molar_mass in [0, -10, "notanumber"]:
@@ -22,8 +29,8 @@ class MakeSafeChemicalTest(TestCase):
             mock_print.reset_mock()
 
             for test_molar_mass in [100, 123.4]:
-                self.assertEqual(chemical.make_safe_chemical(test_molar_mass, ["valid name"]).molar_mass, test_molar_mass)
-                self.assertEqual(chemical.make_safe_chemical(str(test_molar_mass), ["valid name"]).molar_mass, test_molar_mass)
+                self.assertEqual(chemical.make_safe_chemical(test_molar_mass, ["valid_name"]).molar_mass, test_molar_mass)
+                self.assertEqual(chemical.make_safe_chemical(str(test_molar_mass), ["valid_name"]).molar_mass, test_molar_mass)
                 mock_print.assert_not_called()
 
     def test_name_collision(self):

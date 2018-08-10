@@ -36,6 +36,10 @@ def line_too_short_in_chemical_file(line_number: float):
           "more information, see 'buf help chemical'.")
     exit()
 
+def spaces_in_chemical_name(chemical_name: str):
+    print("Invalid chemical name: '" + str(chemical_name) + "' cannot contain spaces.")
+    exit()
+
 # --------------------------------------------------------------------------------
 # ---------------------------------RECIPE ERRORS----------------------------------
 # --------------------------------------------------------------------------------
@@ -71,6 +75,10 @@ def line_too_short_in_recipe_file(line_number: float):
 
 def line_has_inequal_contents_in_recipe_file(line_number: float):
     print("Invalid line length: line " + str(line_number) + " contains an inequal number of concentrations and chemical names.")
+    exit()
+
+def spaces_in_recipe_name(recipe_name: str):
+    print("Invalid recipe name: '" + str(recipe_name) + "' cannot contain spaces.")
     exit()
 
 # --------------------------------------------------------------------------------
