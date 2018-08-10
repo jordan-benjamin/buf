@@ -2,6 +2,8 @@
 # Author: Jordan Juravsky
 # Date created: 31-07-2018
 
+"""Module for calculating the amount to add of each ingredient when making a buffer/solution."""
+
 from buf.commands import chemical, recipe
 from buf import unit, error_messages
 import tabulate
@@ -24,6 +26,7 @@ make sure that one uses the font 'New Courier', in order for the table to be for
 """
 
 def make(options: dict):
+    """Parse command line options, calling the appropriate function."""
     if options["<recipe_name>"]:
         recipe_object = get_recipe(options["<recipe_name>"])
     else:
@@ -36,6 +39,7 @@ def make(options: dict):
 
 
 def get_buffer_litres(volume_as_string: str):
+    """Given a string containing a volume of buffer/solution to make, returns the volume in litres as a float."""
     magnitude, symbol = unit.split_unit_quantity(volume_as_string)
 
     try:
@@ -53,6 +57,13 @@ def get_buffer_litres(volume_as_string: str):
 
 
 def calculate_amount_to_add(buffer_volume_in_litres: float, concentration: str, chemical_name: str, chemical_library: dict):
+    """Calculates the amount of an ingredient one must add to a buffer.
+
+    If concentration is specified in:
+        - Units of volume or mass (i.e. is constant): the amount to add is equal to the concentration.
+        - Molar: the amount to add is equal to the buffer volume (in litres) * molar mass of the chemical * the chemical's concentration (in molar).
+        - Percentage points: the amount to add is the specified percentage of the buffer volume.
+    """
     magnitude, symbol = unit.split_unit_quantity(concentration)
 
     if symbol in unit.concentration_units:
@@ -72,6 +83,7 @@ def calculate_amount_to_add(buffer_volume_in_litres: float, concentration: str, 
     return unit.scale_and_round_unit_quantity(magnitude, symbol)
 
 def get_recipe(recipe_name: str):
+    """Return the Recipe object corresponding to the given name."""
     recipe_library = recipe.load_recipes()
 
     if recipe_name not in recipe_library:
@@ -81,6 +93,7 @@ def get_recipe(recipe_name: str):
 
 
 class Step:
+    """Record describing the name of an ingredient in a solution/buffer recipe, its concentration, and the amount of it to add."""
     def __init__(self, name: str, concentration: str, amount_to_add: str):
         self.name = name
         self.concentration = concentration
@@ -89,7 +102,7 @@ class Step:
         return self.name == other.name and self.concentration == other.concentration and self.amount_to_add == other.amount_to_add
 
 class BufferInstructions:
-
+    """Stores all the Steps required to make a buffer/solution recipe."""
     def __init__(self, buffer_volume_in_litres: float, recipe_object: recipe.Recipe):
 
         self.steps = []
@@ -101,6 +114,7 @@ class BufferInstructions:
                                    calculate_amount_to_add(buffer_volume_in_litres, concentration, chemical_name, chemical_library)))
 
     def print(self):
+        """Prints all the Steps required to make the buffer."""
         matrix = [[step.name, step.concentration, step.amount_to_add] for step in self.steps]
 
         print(tabulate.tabulate(matrix, headers=["Chemical Name", "Concentration", "Amount to Add"], tablefmt="fancy_grid"))
