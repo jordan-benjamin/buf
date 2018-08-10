@@ -10,4 +10,5 @@ def confirm():
         user_input = input("Invalid input. Are you sure? [y/n]")
 
     if user_input == "n":
+        print("Operation cancelled.")
         exit()
