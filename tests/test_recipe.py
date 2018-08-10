@@ -18,7 +18,6 @@ class MakeRecipeTest(TestCase):
 
     def test_existing_chemical_check(self):
 
-        # TODO: verify that it only throws an error on concentration units.
             with mock.patch("buf.commands.recipe.print") as mock_print:
                 # Testing the code stops if no matching chemical
                 with self.assertRaises(SystemExit):
@@ -27,8 +26,10 @@ class MakeRecipeTest(TestCase):
 
                 mock_print.reset_mock()
 
-                # Testing code words if chemical exists.
-                recipe.make_safe_recipe("boop", ["300mM"], ["salt"], chemical_library={"salt" : None}, recipe_library= {})
+                # Testing code words if chemical exists. Also verifies that a chemical is only checked to exist in the chemical
+                # library if concentration is specified in molar (i.e. glycerol not in library, should not be checked since concentration
+                # is in % volume).
+                recipe.make_safe_recipe("boop", ["300mM", "10%"], ["salt", "glycerol"], chemical_library={"salt" : None}, recipe_library= {})
                 mock_print.assert_not_called()
 
 
@@ -45,9 +46,8 @@ class MakeRecipeTest(TestCase):
 
                 with self.assertRaises(SystemExit):
                     recipe.make_safe_recipe("name", ["123" + unit], ["salt"], chemical_library={"salt" : None}, recipe_library={})
-
-                mock_print.assert_called()
-                mock_print.reset_mock()
+                    mock_print.assert_called()
+                    mock_print.reset_mock()
 
     def test_quantity_validity(self):
         with mock.patch("buf.commands.recipe.print") as mock_print:
@@ -62,17 +62,18 @@ class MakeRecipeTest(TestCase):
             for quantity in ["", "-1", "0"]:
                 with self.assertRaises(SystemExit):
                     recipe.make_safe_recipe("name", [quantity + "L"], ["salt"], chemical_library={"salt" : None}, recipe_library={})
-                mock_print.assert_called()
-                mock_print.reset_mock()
+                    mock_print.assert_called()
+                    mock_print.reset_mock()
 
     def test_string_cast(self):
         with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={"salt": None, "pepper" : None}):
             test_recipe = recipe.Recipe("name", ["300mM", "4L"], ["salt", "pepper"])
             self.assertEqual(str(test_recipe), "name 300mM salt 4L pepper")
 
-    # TODO: check two recipes with identical ingredients and concentrations, but in different orders.
     def equals_check(self):
         with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={"salt": None, "pepper": None}):
+
+            # Changing all possible variables (name, units, chemical name, concentration)
             first_recipe = recipe.Recipe("name", ["300mM"], ["salt"])
             second_recipe = recipe.Recipe("name", ["300mM"], ["salt"])
             third_recipe = recipe.Recipe("name2", ["300mM"], ["salt"])
@@ -86,9 +87,15 @@ class MakeRecipeTest(TestCase):
             self.assertNotEqual(first_recipe, fifth_recipe)
             self.assertNotEqual(first_recipe, sixth_recipe)
 
+            # Testing that two recipes that have identical contents, but in different orders, are equal.
+            forwards_recipe = recipe.Recipe("my_recipe", ["1M", "2M"], ["salt", "pepper"])
+            backwards_recipe = recipe.Recipe("my_recipe", ["2M", "1M"], ["pepper", "salt"])
+
+            self.assertEqual(forwards_recipe, backwards_recipe)
+
 
 class IntegratedTests(TestCase):
-    # TODO: research whether two dictionaries a = {1: object_a} and b = {1: object_b} are equal if object_a == object_b as defined in __eq__
+
     def test_read_write(self):
         with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={"salt": None, "pepper": None}):
 
@@ -117,26 +124,32 @@ class TestAddFromFile(TestCase):
 
     def test_errors(self):
         with mock.patch("buf.commands.recipe.open") as mock_open:
-            with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value = {"Arg" : None, "KCl" : None,
-                                                                                           "salt" : None, "pepper" : None}):
+            with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value = {"Arg" : None, "KCl" : None,  "salt" : None, "pepper" : None}):
                 with mock.patch("buf.commands.recipe.load_recipes", return_value = {"wash" : None, "elution" : None}):
                     with mock.patch("buf.commands.recipe.print") as mock_print:
-                        # Invalid file contents
-                        for file_contents in ["refold 500mM unknownchemical 5g Arg", "wash 300mM salt", "name 300weirdunit pepper",
-                                              "refold 300mM salt\nrefold 4M pepper", "name 300mM"]:
-                            with self.assertRaises(SystemExit):
 
+                        # Testing an invalid file name.
+                        with self.assertRaises(SystemExit):
+                            recipe.add_recipes_from_file("invalidfile")
+
+                        with mock.patch("buf.commands.recipe.os.path.isfile", return_value = True):
+
+                            # Invalid file contents
+                            for file_contents in ["refold 500mM unknownchemical 5g Arg", "wash 300mM salt", "name 300weirdunit pepper",
+                                                  "refold 300mM salt\nrefold 4M pepper", "name 300mM"]:
+                                with self.assertRaises(SystemExit):
+
+                                    mock_open.return_value.__enter__.return_value = StringIO(file_contents)
+                                    recipe.add_recipes_from_file("whatever")
+                                    mock_print.assert_called()
+                                    mock_open.return_value.__enter__.return_value.write.assert_not_called()
+
+                                    mock_print.reset_mock()
+
+                            # Valid file contents
+                            for file_contents in ["refold 300mM Arg", "refold 4mL pepper 10% salt", "refold 3M salt\nother 4% pepper"]:
                                 mock_open.return_value.__enter__.return_value = StringIO(file_contents)
                                 recipe.add_recipes_from_file("whatever")
-                                mock_print.assert_called()
-                                mock_open.return_value.__enter__.return_value.write.assert_not_called()
-
-                                mock_print.reset_mock()
-
-                        # Valid file contents
-                        for file_contents in ["refold 300mM Arg", "refold 4mL pepper 10% salt", "refold 3M salt\nother 4% pepper"]:
-                            mock_open.return_value.__enter__.return_value = StringIO(file_contents)
-                            recipe.add_recipes_from_file("whatever")
 
 
 
@@ -162,8 +175,9 @@ class TestAddFromFile(TestCase):
                     mock_print.assert_called()
 
 class SaveRecipeLibraryTest(TestCase):
+
     def test_read_write(self):
-        # No need to include Arg and glycerol in library since existing chemical are only checked for if concentration is in molar.
+        # No need to include Arg and glycerol in library since existing chemicals are only checked for if their concentration is in molar.
         with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value = {"salt" : None, "pepper" : None}):
             temp_file = NamedTemporaryFile("w+")
 

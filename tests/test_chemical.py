@@ -29,13 +29,9 @@ class MakeSafeChemicalTest(TestCase):
     def test_name_collision(self):
         with mock.patch("buf.commands.chemical.print") as mock_print:
                 # Ensuring an invalid chemical is not created
-                try:
+                with self.assertRaises(SystemExit):
                     chemical.make_safe_chemical(123, ["salt", "pepper"], {"salt": None})
-                except:
-                    pass
-
-                self.assertRaises(SystemExit)
-                mock_print.assert_called()
+                    mock_print.assert_called()
 
 
                 # Ensuring a valid chemical is created.
@@ -77,25 +73,32 @@ class LoadChemicalTest(TestCase):
 class TestAddFromFile(TestCase):
 
     def test_errors(self):
+
         with mock.patch("buf.commands.chemical.open") as mock_open:
             with mock.patch("buf.commands.chemical.load_chemicals", return_value = {"Arg" : None, "KCl" : None}):
                 with mock.patch("buf.commands.chemical.print") as mock_print:
-                    # Invalid file contents
-                    for file_contents in ["100 salt pepper\n200 salt", "NotANumber salt pepper", "123 KCl pepper", \
-                                          "0 validname othervalidname\n100 salt pepper", "-2 salt"]:
-                        with self.assertRaises(SystemExit):
 
+                    # Testing an invalid file name.
+                    with self.assertRaises(SystemExit):
+                        chemical.add_chemicals_from_file("invalidfilename")
+
+                    with mock.patch("buf.commands.chemical.os.path.isfile", return_value = True):
+                        # Invalid file contents
+                        for file_contents in ["100 salt pepper\n200 salt", "NotANumber salt pepper", "123 KCl pepper", \
+                                              "0 validname othervalidname\n100 salt pepper", "-2 salt"]:
+                            with self.assertRaises(SystemExit):
+
+                                mock_open.return_value.__enter__.return_value = StringIO(file_contents)
+                                chemical.add_chemicals_from_file("whatever")
+                                mock_print.assert_called()
+                                mock_open.return_value.__enter__.return_value.write.assert_not_called()
+
+                                mock_print.reset_mock()
+
+                        # Valid file contents
+                        for file_contents in ["100 salt pepper\n200 name\n123.5 has three names"]:
                             mock_open.return_value.__enter__.return_value = StringIO(file_contents)
                             chemical.add_chemicals_from_file("whatever")
-                            mock_print.assert_called()
-                            mock_open.return_value.__enter__.return_value.write.assert_not_called()
-
-                            mock_print.reset_mock()
-
-                    # Valid file contents
-                    for file_contents in ["100 salt pepper\n200 name\n123.5 has three names"]:
-                        mock_open.return_value.__enter__.return_value = StringIO(file_contents)
-                        chemical.add_chemicals_from_file("whatever")
 
 
 

@@ -9,12 +9,12 @@ from buf import unit
 class SplitUnitQuantityTest(TestCase):
 
     def test_correct_split(self):
-        for quantity in ["100", "1.0", "2343.5", ".1", "10."]:
+        for quantity in ["100", "1.0", "2343.5", ".1", "10.", "0", "-5"]:
             for symbol in ["M", "L", "mM", ""]:
                 test_string = str(quantity)+symbol
-                returned_quantity, returned_unit = unit.split_unit_quantity(test_string)
-                self.assertEqual(quantity, returned_quantity)
-                self.assertEqual(symbol, returned_unit)
+                returned_magnitude, returned_symbol = unit.split_unit_quantity(test_string)
+                self.assertEqual(quantity, returned_magnitude)
+                self.assertEqual(symbol, returned_symbol)
 
 class UnitLadderTest(TestCase):
 
