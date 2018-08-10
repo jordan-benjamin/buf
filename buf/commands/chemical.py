@@ -239,7 +239,7 @@ def load_chemicals():
 
         return chemicals
     except:
-        error_messages.library_load_error(library_name="chemical")
+        error_messages.library_load_error(lower_case_library_name="chemical")
 
 def reset():
     with open(chemical_library_file, "w") as file:
