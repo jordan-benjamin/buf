@@ -11,8 +11,3 @@ def confirm():
 
     if user_input == "n":
         exit()
-
-def simulated_input(message):
-    for response in ["ffsf", "fssdfiusdfiuh", "n"]:
-        yield response
-
