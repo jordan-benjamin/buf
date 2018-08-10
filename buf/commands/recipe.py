@@ -259,3 +259,5 @@ def delete_recipe(recipe_name: str, prompt_for_confirmation: bool = True):
     del(recipe_library[recipe_name])
 
     save_recipe_library(recipe_library)
+
+    print("Deletion successful.")

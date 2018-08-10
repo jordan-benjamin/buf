@@ -206,6 +206,8 @@ def delete_chemical(chemical_name: str, complete_deletion: bool = False, prompt_
 
     save_chemical_library(chemical_library)
 
+    print("Deletion successful.")
+
 # --------------------------------------------------------------------------------
 # ------------------------READING/WRITING TO CHEMICAL LIBRARY---------------------
 # --------------------------------------------------------------------------------
