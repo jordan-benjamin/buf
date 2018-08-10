@@ -2,15 +2,19 @@
 # Author: Jordan Juravsky
 # Date created: 01-08-2018
 
-import sys
-import inspect
 from buf import commands
 from buf import error_messages
 
-# TODO: complete.
-instructions = """buf help:
+instructions = """
 
-ADD TO THIS."""
+buf help:
+
+This subcommand provides documentation/usage instruction for all buf subcommands.
+
+To access the documentation for a specific subcommand, use 'buf help <subcommand_name>'.
+
+For a general overview of the program, use 'buf help'.
+"""
 
 general_help_docstring = """
 
