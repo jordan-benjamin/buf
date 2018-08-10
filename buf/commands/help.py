@@ -36,6 +36,7 @@ buf chemical:
 buf recipe:
     Allows you to define and edit buffer/solution recipes.
     
+    View entire recipe library: buf recipe
     View information about a specific recipe: buf recipe <recipe_name>
     
     Add a recipe: buf recipe -a <recipe_name> (<concentration> <chemical_name>)...
@@ -55,6 +56,8 @@ For detailed about a specific subcommand, use 'buf help <subcommand_name>'.
 """
 
 def help(options):
+    """Parses command line options, finding the instructions docstring of a subcommand if the subcommand is specified, \
+    otherwise printing the general help docstring of buf."""
     if options["<subcommand_name>"]:
         subcommand = options["<subcommand_name>"]
 
