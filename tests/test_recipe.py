@@ -9,8 +9,6 @@ from tempfile import NamedTemporaryFile
 from io import StringIO
 
 
-import buf.unit
-
 from buf.commands import recipe
 
 
@@ -222,3 +220,10 @@ class TestDeleteRecipe(TestCase):
                 recipe.delete_recipe("buffer_a", prompt_for_confirmation=False)
 
                 self.assertEqual(after_delete, recipe.load_recipes())
+
+class DisplayRecipeInformationTest(TestCase):
+
+    def test_errors(self):
+        with mock.patch("buf.commands.recipe.load_recipes", return_value = {}):
+            with self.assertRaises(SystemExit):
+                recipe.display_recipe_information("unknown_recipe")

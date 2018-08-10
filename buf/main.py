@@ -11,7 +11,6 @@ else:
     import buf.commands as commands
 
 
-# TODO: create some sort of display_recipe_library option?
 # TODO: add buf reset
 docstring = """
 buf
@@ -25,6 +24,7 @@ Usage:
     buf chemical -a <file_name>
     buf chemical -n <existing_chemical_name> <nicknames>...
     buf chemical -d <chemical_name> [--complete] [--confirm]
+    buf recipe
     buf recipe <recipe_name>
     buf recipe -a <recipe_name> (<concentrations> <chemical_names>)...
     buf recipe -a <file_name>

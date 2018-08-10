@@ -4,9 +4,9 @@
 
 from buf import unit, user_input, error_messages
 from buf.commands import chemical
-from sys import exit
 from typing import Sequence
 import os
+import tabulate
 
 instructions = """buf recipe:
 
@@ -46,9 +46,11 @@ def recipe(options: dict):
     if options["-a"]:
         add_single_recipe(options["<recipe_name>"], options["<concentrations>"], options["<chemical_names>"])
     elif options["-d"]:
-        delete_recipe(options["<recipe_name>"], options["--confirm"])
+        delete_recipe(options["<recipe_name>"], prompt_for_confirmation= not options["--confirm"])
     elif options["<recipe_name>"]:
         display_recipe_information(options["<recipe_name>"])
+    else:
+        display_recipe_library()
 
 # --------------------------------------------------------------------------------
 # ----------------------------RECIPE DEFINITION AND CREATION----------------------
@@ -97,13 +99,18 @@ class Recipe:
     def get_contents(self):
         return [(concentration, chemical_name) for concentration, chemical_name in zip(self.concentrations, self.chemical_names)]
 
+    def get_contents_string(self):
+        string = str(self.concentrations[0]) + " " + str(self.chemical_names[0])
+        for concentration, chemical_name in zip(self.concentrations[1:], self.chemical_names[1:]):
+            string += " " + str(concentration) + " " + str(chemical_name)
+        return string
+
     def __str__(self):
         string = self.name
         for concentration, chemical_name in zip(self.concentrations, self.chemical_names):
             string += " " + str(concentration) + " " + str(chemical_name)
         return string
 
-    # TODO: two recipes that have the same ingredients and concentrations, but in different orders, should be equal.
     def __eq__(self, other):
         return self.name == other.name and set(self.get_contents()) == set(other.get_contents())
 
@@ -183,9 +190,20 @@ def display_recipe_information(recipe_name: str):
 
     recipe_object = recipe_library[recipe_name]
 
-    print("Recipe name: " + str(recipe_object))
-    print("Contents:", *[str(concentration) + " " + str(chemical_name) for concentration,
-                                                    chemical_name in zip(recipe_object.concentrations, recipe_object.chemical_names)])
+    print("Recipe name:", recipe_object.name)
+
+    print("Contents:", recipe_object.get_contents_string())
+
+def display_recipe_library():
+    print("The recipes in your library are:")
+
+    recipe_library = load_recipes()
+
+    table = [(recipe_object.name, recipe_object.get_contents_string()) for recipe_object in recipe_library.values()]
+    table.sort(key = lambda entry: entry[0])
+
+    print(tabulate.tabulate(table, headers=["Recipe Name", "Contents"], tablefmt="fancy_grid"))
+
 
 # --------------------------------------------------------------------------------
 # --------------------------READING/WRITING TO RECIPE LIBRARY---------------------
