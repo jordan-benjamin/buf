@@ -2,7 +2,7 @@
 # Author: Jordan Juravsky
 # Date created: 27-07-2018
 
-"""Module for handling one's chemical library of chemicals and their molar masses"""
+"""Module for handling one's chemical library of chemicals and their molar masses."""
 
 
 import os

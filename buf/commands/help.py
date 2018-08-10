@@ -2,6 +2,8 @@
 # Author: Jordan Juravsky
 # Date created: 01-08-2018
 
+"""Module for accessing the documentation of buf and its subcommands."""
+
 from buf import commands
 from buf import error_messages
 
