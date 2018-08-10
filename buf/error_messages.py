@@ -56,8 +56,8 @@ def recipe_already_exists(recipe_name: str):
           "recipes in your library, use 'buf recipe'. For more information, see 'buf help recipe'.")
     exit()
 
-def invalid_concentration_unit(unit: str):
-    print("Invalid unit: '" + str(unit) + "' is not a valid unit. Valid units are:", *unit.valid_units)
+def invalid_concentration_unit(symbol: str):
+    print("Invalid unit: '" + str(symbol) + "' is not a valid unit. Valid units are:", *unit.valid_units)
     exit()
 
 def non_number_concentration_magnitude(magnitude: str):
@@ -85,8 +85,8 @@ def spaces_in_recipe_name(recipe_name: str):
 # -----------------------------------MAKE ERRORS----------------------------------
 # --------------------------------------------------------------------------------
 
-def invalid_buffer_volume_unit(unit: str):
-    print("Invalid volume unit: '" + str(unit) + "' is not a unit of volume.")
+def invalid_buffer_volume_unit(symbol: str):
+    print("Invalid volume unit: '" + str(symbol) + "' is not a unit of volume.")
     exit()
 
 def non_number_buffer_volume_magnitude(magnitude: str):
