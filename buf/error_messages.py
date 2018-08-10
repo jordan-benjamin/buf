@@ -119,6 +119,6 @@ def library_load_error(lower_case_library_name: str):
     exit()
 
 # Data type refers to chemicals or recipes.
-def add_from_file_termination(line_number: str, upper_case_data_type: str):
-    print("Error encountered on line " + str(line_number) + ". " + str(upper_case_data_type) + " specified in file not added to library.")
+def add_from_file_termination(line_number_zero_indexed: str, upper_case_data_type: str):
+    print("Error encountered on line " + str(line_number_zero_indexed + 1) + ". " + str(upper_case_data_type) + " specified in file not added to library.")
     exit()
