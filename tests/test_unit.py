@@ -54,12 +54,9 @@ class UnitLadderTest(TestCase):
         self.assertFalse(test_ladder.can_scale_down_unit("uL"))
 
         with mock.patch("buf.unit.print") as mock_print:
-            try:
+            with self.assertRaises(SystemExit):
                 test_ladder.scale_down_unit("µL")
-            except:
-                pass
-            self.assertRaises(SystemExit)
-            mock_print.assert_called()
+                mock_print.assert_called()
 
 class ConversionMethodsTest(TestCase):
 
