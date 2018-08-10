@@ -2,7 +2,7 @@
 # Author: Jordan Juravsky
 # Date created: 31-07-2018
 
-from buf import unit, user_input
+from buf import unit, user_input, error_messages
 from buf.commands import chemical
 from sys import exit
 from typing import Sequence
@@ -24,19 +24,28 @@ need to exist in your library.
 
 To add a recipe to your library, use 'buf recipe -a <recipe_name> (<concentration> <chemical_name>)...'. \
 For example, to add the recipe specified above, use 'buf recipe -a my_recipe 300mM NaCl 10% glycerol'.
- 
+
+Another way to add recipes to your library is by specifying a list of them in a text file. This file should contain one recipe \
+per line, where the first word on each line specifies the recipe's name, followed by the list of the recipe's contents, listing the concentration \
+of each chemical before the chemical's name. Spaces should separate each item on a line. For example, if a file 'recipes.txt' \
+contained the following:
+
+buffer_a 300mM NaCl 1M KCl
+buffer_b 500mM Arginine 10% glycerol
+
+Using 'buf recipe -a recipes.txt' would add these two recipes to your library.
+
 To delete a recipe, use 'buf recipe -d <recipe_name>'. To skip the program asking you to confirm your decision, use \
 the '--confirm' option.
 
-To view the contents of a recipe, use 'buf recipe <chemical_name>'."""
+To view the contents of a recipe, use 'buf recipe <recipe_name>'."""
 
 recipe_library_file = os.path.join(os.path.dirname(__file__), "../library/recipes.txt")
 
-# TODO: raise error if none of the options specified work (i.e. an else at the bottom of the method)?
 def recipe(options: dict):
-    if options["-a"] == True:
+    if options["-a"]:
         add_single_recipe(options["<recipe_name>"], options["<concentrations>"], options["<chemical_names>"])
-    elif options["-d"] == True:
+    elif options["-d"]:
         delete_recipe(options["<recipe_name>"], options["--confirm"])
     elif options["<recipe_name>"]:
         display_recipe_information(options["<recipe_name>"])
@@ -56,36 +65,25 @@ def make_safe_recipe(name: str, concentrations: Sequence[str], chemical_names : 
     # TODO: check if name is blank? will docopt let that happen?
     # TODO: ensure that docopt with guarantee that the lengths of concentrations and chemical_names are the same.
     if name in recipe_library:
-        print(f"Name collision: '{name}' already exists in chemical library.")
-        exit()
+        error_messages.recipe_already_exists(name)
 
     for concentration, chemical_name in zip(concentrations, chemical_names):
 
-        quantity, symbol = unit.split_unit_quantity(concentration)
+        magnitude, symbol = unit.split_unit_quantity(concentration)
 
-        # TODO: accept blank unit, load from settings.
         if symbol not in unit.valid_units:
-            # TODO: display all valid units?
-            print(f"Invalid unit: '{symbol}' is not a valid unit.")
-            exit()
+            error_messages.invalid_concentration_unit(symbol)
 
         if symbol in unit.concentration_units and chemical_name not in chemical_library:
-            print(f"Chemical not found: molar mass of '{chemical_name}' not in chemical library. "
-                  "Before specifying a chemical's concentration with molarity, first use 'buf chemical -a "
-                  "<molar_mass> <chemical_names>...' to add the chemical to your library.")
-            exit()
-
+            error_messages.chemical_not_found(chemical_name)
 
         try:
-            float_quantity = float(quantity)
+            float_magnitude = float(magnitude)
         except:
-            # TODO: change this message to mention numbers?
-            print(f"Invalid quantity: '{quantity}' is not a valid quantity")
-            exit()
+            error_messages.non_number_concentration_magnitude(magnitude)
 
-        if float_quantity <= 0:
-            print(f"Invalid quantity: '{float_quantity}' is not greater than 0.")
-            exit()
+        if float_magnitude <= 0:
+            error_messages.non_positive_concentration_magnitude(float_magnitude)
 
     return Recipe(name, concentrations, chemical_names)
 
@@ -97,20 +95,17 @@ class Recipe:
         self.chemical_names = chemical_names
 
     def get_contents(self):
-        string = f"{self.concentrations[0]} {self.chemical_names[0]}"
-        for concentration, chemical_name in zip(self.concentrations[1:], self.chemical_names[1:]):
-            string += f" {concentration} {chemical_name}"
-        return string
+        return [(concentration, chemical_name) for concentration, chemical_name in zip(self.concentrations, self.chemical_names)]
 
     def __str__(self):
-        return self.name + " " + self.get_contents()
+        string = self.name
+        for concentration, chemical_name in zip(self.concentrations, self.chemical_names):
+            string += " " + str(concentration) + " " + str(chemical_name)
+        return string
 
     # TODO: two recipes that have the same ingredients and concentrations, but in different orders, should be equal.
     def __eq__(self, other):
-        return self.name == other.name and self.concentrations == \
-               other.concentrations and self.chemical_names == other.chemical_names
-
-
+        return self.name == other.name and set(self.get_contents()) == set(other.get_contents())
 
 # --------------------------------------------------------------------------------
 # ----------------------------------ADDING RECIPES--------------------------------
@@ -123,14 +118,16 @@ def add_single_recipe(name: str, concentrations: Sequence[str], chemical_names: 
     with open(recipe_library_file, "a") as file:
         file.write(str(new_recipe) + "\n")
 
-# TODO: what's better practice? reading file lines then getting out, or iterating through the file inside the context manager?
+
 def add_recipes_from_file(filename : str):
+    if os.path.isfile(filename) == False:
+        error_messages.file_not_found(filename)
+
     try:
         with open(filename, "r") as file:
             lines = file.readlines()
     except:
-        # TODO: tell user to specify absolute path / go to the right directory?
-        print(f"File not found: '{filename}' could not be located.")
+        error_messages.file_read_error(filename)
 
     existing_chemical_library = chemical.load_chemicals()
     existing_recipe_library = load_recipes()
@@ -144,11 +141,9 @@ def add_recipes_from_file(filename : str):
             if len(words) == 0:
                 continue
             elif len(words) < 3:
-                print(f"Invalid line length: line {line_number} must contain at least one concentration-chemical name pair.")
-                exit()
+                error_messages.line_too_short_in_recipe_file(line_number)
             elif len(words) % 2 == 0:
-                print(f"Invalid line length: line {line_number} contains an inequal number of concentrations and chemical names.")
-                exit()
+                error_messages.line_has_inequal_contents_in_recipe_file(line_number)
 
             recipe_name = words[0]
 
@@ -161,15 +156,12 @@ def add_recipes_from_file(filename : str):
                                           recipe_library=existing_recipe_library)
 
             if recipe_name in new_recipe_library:
-                print(f"Duplicate file entry: '{name}' already used earlier in file.")
-                exit()
-
+                error_messages.duplicate_file_entry(recipe_name)
 
             new_recipe_library[recipe_name] = new_recipe_object
 
         except:
-            print(f"Error encountered on line {line_number}. Recipes specified in file not added to library.")
-            exit()
+            error_messages.add_from_file_termination(line_number, upper_case_data_type="Recipes")
 
     with open(recipe_library_file, "a") as file:
         # Note: dict.values() can be used here but not in chemical.add_chemicals_from_file, since chemicals can
@@ -177,7 +169,7 @@ def add_recipes_from_file(filename : str):
         for new_recipe in list(new_recipe_library.values()):
             file.write(str(new_recipe) + "\n")
 
-    print(f"Added the following recipes to your library:", *list(new_recipe_library.keys()))
+    print("Added the following recipes to your library:", *list(new_recipe_library.keys()))
 
 # --------------------------------------------------------------------------------
 # --------------------------------DISPLAYING RECIPES------------------------------
@@ -187,40 +179,42 @@ def display_recipe_information(recipe_name: str):
     recipe_library = load_recipes()
 
     if recipe_name not in recipe_library:
-        print(f"Invalid recipe name: '{recipe_name}' not in recipe library.")
-        exit()
+        error_messages.recipe_not_found(recipe_name)
 
     recipe_object = recipe_library[recipe_name]
 
-    print(f"Recipe name: {recipe_object.name}")
-    print(f"Contents: {recipe_object.get_contents()}")
+    print("Recipe name: " + str(recipe_object))
+    print("Contents:", *[str(concentration) + " " + str(chemical_name) for concentration,
+                                                    chemical_name in zip(recipe_object.concentrations, recipe_object.chemical_names)])
 
 # --------------------------------------------------------------------------------
 # --------------------------READING/WRITING TO RECIPE LIBRARY---------------------
 # --------------------------------------------------------------------------------
 
 def load_recipes():
-    # TODO: what if someone manually mucks up the file? check for corruption?
     recipes = {}
     chemical_library = chemical.load_chemicals()
 
-    with open(recipe_library_file, "r") as file:
-        for line in file:
+    try:
+        with open(recipe_library_file, "r") as file:
+            for line in file:
 
-            words = line.split()
+                words = line.split()
 
-            name = words[0]
-            concentrations = []
-            chemical_names = []
+                name = words[0]
+                concentrations = []
+                chemical_names = []
 
-            for index in range(1, len(words[1:]), 2):
-                concentrations.append(words[index])
-                chemical_names.append(words[index+1])
+                for index in range(1, len(words[1:]), 2):
+                    concentrations.append(words[index])
+                    chemical_names.append(words[index+1])
 
-            recipe = make_safe_recipe(name, concentrations, chemical_names, chemical_library=chemical_library, recipe_library=recipes)
-            recipes[name] = recipe
+                recipe = make_safe_recipe(name, concentrations, chemical_names, chemical_library=chemical_library, recipe_library=recipes)
+                recipes[name] = recipe
 
-    return recipes
+        return recipes
+    except:
+        error_messages.library_load_error(lower_case_library_name= "recipe")
 
 def save_recipe_library(recipe_library: dict):
     with open(recipe_library_file, "w") as file:
@@ -239,8 +233,7 @@ def delete_recipe(recipe_name: str, prompt_for_confirmation: bool = True):
     recipe_library = load_recipes()
 
     if recipe_name not in recipe_library:
-        print(f"Recipe not found: '{recipe_name}' not found in recipe library.")
-        exit()
+        error_messages.recipe_not_found(recipe_name)
 
     if prompt_for_confirmation:
         user_input.confirm()
@@ -248,4 +241,3 @@ def delete_recipe(recipe_name: str, prompt_for_confirmation: bool = True):
     del(recipe_library[recipe_name])
 
     save_recipe_library(recipe_library)
-

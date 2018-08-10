@@ -5,7 +5,7 @@
 import os
 import tabulate
 from sys import exit
-from buf import user_input
+from buf import user_input, error_messages
 from typing import Sequence
 
 instructions = """buf chemical:
@@ -28,8 +28,8 @@ To add additional names to an existing entry in your chemical library (also know
  or 'table_salt' to refer to the same molar mass.
  
 Another way to add chemicals to your library is by specifying a list of them in a text file. This file should contain one chemical \
-per line, where each line first specifies the chemical's molar mass, followed by the list of the chemical's names. Spaces should \
-separate each item on a line. For example, if a file 'chemicals.txt' contained the following:
+per line, where the first word on each line specifies the chemical's molar mass, followed by the list of the chemical's names. Spaces should \
+separate each item on a line. For example, if a file 'chemicals.txt' contains the following:
 
 58.44 NaCl salt
 68.08 Imidazole imi
@@ -90,19 +90,16 @@ def make_safe_chemical(molar_mass : str, names : list, chemical_library: dict = 
 
     for name in names:
         if name in chemical_library:
-            print(f"Name collision: '{name}' already exists in chemical library")
-            exit()
+            error_messages.chemical_already_exists(name)
 
     try:
         molar_mass = float(molar_mass)
     except:
-        print(f"Invalid molar mass: '{molar_mass}' is not a number.")
-        exit()
+        error_messages.non_number_molar_mass(molar_mass)
 
 
     if molar_mass <= 0:
-        print(f"Invalid molar mass: '{molar_mass}' must be greater than 0.")
-        exit()
+        error_messages.non_positive_molar_mass(molar_mass)
 
     return Chemical(molar_mass, names)
 
@@ -117,15 +114,13 @@ def add_single_chemical(molar_mass: str, names: Sequence[str]):
 
 def add_chemicals_from_file(filename : str):
     if os.path.isfile(filename) == False:
-        print(f"File not found: '{filename}' could not be located.'")
-        exit()
+        error_messages.file_not_found(filename)
 
     try:
         with open(filename, "r") as file:
             lines = file.readlines()
     except:
-        print(f"File read error: '{filename}' could not be read.")
-        exit()
+        error_messages.file_read_error(filename)
 
     existing_chemical_library = load_chemicals()
 
@@ -139,32 +134,28 @@ def add_chemicals_from_file(filename : str):
             if len(words) == 0:
                 continue
             elif len(words) < 2:
-                print(f"Invalid line length: line {line_number} must have at least one name after its molar mass.")
-                exit()
+                error_messages.invalid_line_in_chemical_file(line_number)
 
             molar_mass = words[0]
             names = words[1:]
-
 
             new_chemical = make_safe_chemical(molar_mass, names, chemical_library=existing_chemical_library)
 
             for name in names:
                 if name in new_chemical_names:
-                    print(f"Duplicate file entry: '{name}' already used earlier in file.")
-                    exit()
+                    error_messages.duplicate_file_entry(name)
                 new_chemical_names.append(name)
 
             new_chemical_objects.append(new_chemical)
 
         except:
-            print(f"Error encountered on line {line_number}. Chemicals specified in file not added to library.")
-            exit()
+            error_messages.add_from_file_termination(line_number, upper_case_data_type="Chemicals")
 
     with open(chemical_library_file, "a") as file:
         for new_chemical in new_chemical_objects:
             file.write(str(new_chemical) + "\n")
 
-    print(f"Added the following chemicals to your library:", *new_chemical_names)
+    print("Added the following chemicals to your library:", *new_chemical_names)
 
 # --------------------------------------------------------------------------------
 # -------------------------NICKNAMING/DELETING CHEMICALS--------------------------
@@ -174,13 +165,11 @@ def nickname_chemical(existing_chemical_name: str, new_names: Sequence[str]):
     chemical_library = load_chemicals()
 
     if existing_chemical_name not in chemical_library:
-        print(f"Name error: '{existing_chemical_name}' does not exist in chemical library.")
-        exit()
+        error_messages.chemical_not_found(existing_chemical_name)
 
     for new_name in new_names:
         if new_name in chemical_library:
-            print(f"Name error: '{new_name}' already exists in chemical library.")
-            exit()
+            error_messages.chemical_already_exists(new_name)
 
     chemical_object = chemical_library[existing_chemical_name]
 
@@ -192,8 +181,7 @@ def delete_chemical(chemical_name: str, complete_deletion: bool = False, prompt_
     chemical_library = load_chemicals()
 
     if chemical_name not in chemical_library:
-        print(f"Chemical not found: '{chemical_name}' not found in chemical library.")
-        exit()
+        error_messages.chemical_not_found(chemical_name)
 
     chemical_object = chemical_library[chemical_name]
 
@@ -210,7 +198,7 @@ def delete_chemical(chemical_name: str, complete_deletion: bool = False, prompt_
     else:
 
         if prompt_for_confirmation:
-            print(f"You are about to delete '{chemical_name}' from your chemical library.")
+            print("You are about to delete '" + str(chemical_name) + "' from your chemical library.")
             user_input.confirm()
 
         chemical_object.names.remove(chemical_name)
@@ -235,20 +223,23 @@ def save_chemical_library(chemical_library: dict):
 
 
 def load_chemicals():
-    with open(chemical_library_file, "r") as file:
-        chemical_lines = file.readlines()
+    try:
+        with open(chemical_library_file, "r") as file:
+            chemical_lines = file.readlines()
 
-    chemicals = {}
+        chemicals = {}
 
-    for line in chemical_lines:
-        words = line.split()
-        molar_mass = words[0]
-        names = words[1:]
-        chemical = make_safe_chemical(molar_mass, names, chemical_library=chemicals)
-        for name in names:
-            chemicals[name] = chemical
+        for line in chemical_lines:
+            words = line.split()
+            molar_mass = words[0]
+            names = words[1:]
+            chemical = make_safe_chemical(molar_mass, names, chemical_library=chemicals)
+            for name in names:
+                chemicals[name] = chemical
 
-    return chemicals
+        return chemicals
+    except:
+        error_messages.library_load_error(library_name="chemical")
 
 def reset():
     with open(chemical_library_file, "w") as file:
@@ -260,27 +251,19 @@ def reset():
 
 def display_chemical_information(chemical_name: str):
     chemical_library = load_chemicals()
-    if chemical_name in chemical_library:
-        chemical = chemical_library[chemical_name]
 
-        print(f"Chemical name: {chemical_name}")
+    if chemical_name not in chemical_name:
+        error_messages.chemical_not_found(chemical_name)
 
-        other_names = [name for name in chemical.names if name != chemical_name]
-        if len(other_names) == 0:
-            other_names_string = ""
-        else:
-            other_names_string = str(other_names[0])
-            for other_name in other_names[1:]:
-                other_names_string += ", " + other_name
+    chemical_object = chemical_library[chemical_name]
 
-        print(f"Other names: {other_names_string}")
+    print("Chemical name: " + str(chemical_name))
 
-        print(f"Molar mass: {chemical.molar_mass}")
+    other_names = [name for name in chemical_object.names if name != chemical_name]
+    print("Other names:", *other_names)
 
-    else:
-        # TODO: prompt user to add new chemical
-        print(f"Name not found: '{chemical_name}' does not currently exist in your chemical library.")
-        exit()
+    print("Molar mass: " + str(chemical_object.molar_mass))
+
 
 
 def display_chemical_library():
