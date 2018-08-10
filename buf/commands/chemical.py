@@ -2,9 +2,11 @@
 # Author: Jordan Juravsky
 # Date created: 27-07-2018
 
+"""Module for handling one's chemical library of chemicals and their molar masses"""
+
+
 import os
 import tabulate
-from sys import exit
 from buf import user_input, error_messages
 from typing import Sequence
 
@@ -51,6 +53,7 @@ chemical library, use 'buf chemical'.
 chemical_library_file = os.path.join(os.path.dirname(__file__), "../library/chemicals.txt")
 
 def chemical(options : dict):
+    """Parses dictionary of command line options and calls appropriate functions."""
     if options["-a"]:
         if options["<file_name>"]:
             add_chemicals_from_file(options["<file_name>"])
@@ -70,6 +73,7 @@ def chemical(options : dict):
 # --------------------------------------------------------------------------------
 
 class Chemical:
+    """A record that maps chemical names to a molar mass."""
     def __init__(self, molar_mass: float, names: Sequence[str]):
         self.molar_mass = molar_mass
         self.names = names
@@ -85,6 +89,7 @@ class Chemical:
 
 
 def make_safe_chemical(molar_mass : str, names : list, chemical_library: dict = None):
+    """Type checks user input, safely making a Chemical if input is valid."""
     if chemical_library == None:
         chemical_library = load_chemicals()
 
@@ -111,11 +116,13 @@ def make_safe_chemical(molar_mass : str, names : list, chemical_library: dict = 
 # --------------------------------------------------------------------------------
 
 def add_single_chemical(molar_mass: str, names: Sequence[str]):
+    """Adds single chemical to library."""
     new_chemical = make_safe_chemical(molar_mass, names)
     with open(chemical_library_file, "a") as file:
         file.write(str(new_chemical) + "\n")
 
 def add_chemicals_from_file(filename : str):
+    """Parses specified file, adding a chemical to the library for each line in the file."""
     if os.path.isfile(filename) == False:
         error_messages.file_not_found(filename)
 
@@ -165,6 +172,7 @@ def add_chemicals_from_file(filename : str):
 # --------------------------------------------------------------------------------
 
 def nickname_chemical(existing_chemical_name: str, new_names: Sequence[str]):
+    """Adds additional names to an existing chemical in the library."""
     chemical_library = load_chemicals()
 
     if existing_chemical_name not in chemical_library:
@@ -181,6 +189,8 @@ def nickname_chemical(existing_chemical_name: str, new_names: Sequence[str]):
     save_chemical_library(chemical_library)
 
 def delete_chemical(chemical_name: str, complete_deletion: bool = False, prompt_for_confirmation: bool = True):
+    """Deletes chemical from the library. If complete_deletion == False, only the specific name specified is deleted from \
+    the library. If true, then the entire chemical record (including all other names) is deleted."""
     chemical_library = load_chemicals()
 
     if chemical_name not in chemical_library:
@@ -216,6 +226,7 @@ def delete_chemical(chemical_name: str, complete_deletion: bool = False, prompt_
 # --------------------------------------------------------------------------------
 
 def save_chemical_library(chemical_library: dict):
+    """Saves chemical_library to file."""
     unique_chemical_objects = []
 
     for chemical_object in chemical_library.values():
@@ -228,6 +239,7 @@ def save_chemical_library(chemical_library: dict):
 
 
 def load_chemicals():
+    """Loads chemical library from file."""
     try:
         with open(chemical_library_file, "r") as file:
             chemical_lines = file.readlines()
@@ -247,6 +259,7 @@ def load_chemicals():
         error_messages.library_load_error(lower_case_library_name="chemical")
 
 def reset():
+    """Wipes chemical library."""
     with open(chemical_library_file, "w") as file:
         pass
 
@@ -255,6 +268,7 @@ def reset():
 # --------------------------------------------------------------------------------
 
 def display_chemical_information(chemical_name: str):
+    """Displays the names and molar mass of a specified chemical."""
     chemical_library = load_chemicals()
 
     if chemical_name not in chemical_name:
@@ -272,7 +286,7 @@ def display_chemical_information(chemical_name: str):
 
 
 def display_chemical_library():
-
+    """Displays all chemicals in the library."""
     chemical_library = load_chemicals()
 
     print("The chemicals in your library are:")
