@@ -122,7 +122,13 @@ def add_single_chemical(molar_mass: str, names: Sequence[str]):
         file.write(str(new_chemical) + "\n")
 
 def add_chemicals_from_file(filename : str):
-    """Parses specified file, adding a chemical to the library for each line in the file."""
+    """Parses specified file, adding a chemical to the library for each line in the file.
+    Each line in the file should first contain the chemicals's molar mass, followed by a list of its names.
+    All words should be separated by spaces. Example file:
+
+    58.44 NaCl table_salt sodium_chloride
+    74.55 KCl potassium_chloride
+    """
     if os.path.isfile(filename) == False:
         error_messages.file_not_found(filename)
 
