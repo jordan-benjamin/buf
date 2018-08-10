@@ -2,6 +2,8 @@
 # Author: Jordan Juravsky
 # Date created: 26-07-2018
 
+"""Entry point when calling buf from the command line, parses command line arguments and passes them to appropriate modules in buf.commands"""
+
 from docopt import docopt
 import sys
 
@@ -31,11 +33,14 @@ Usage:
     buf recipe -d <recipe_name> [--confirm]
     buf make <volume> <recipe_name>
     buf make <volume> (<concentrations> <chemical_names>)...
-
-For more information, see 'buf help' or 'buf help <subcommand_name>'.
 """
 
 def main():
+    """Parses command line arguments, calling the correct modules/functions in turn.
+    If a module is found that matches a subcommand name, the function in the module that shares
+    the same name is called. For example, using the 'buf chemical <args>... [options]' subcommand
+    in turn calls buf.commands.chemical.chemical, passing in the dictionary of command line options
+    as a parameter."""
     options = docopt(docstring, help=False)
     for k, v in options.items():
         if v:
@@ -46,9 +51,11 @@ def main():
 
 
 def line(string):
+    """Simulates a command line entry."""
     sys.argv = string.split()
     main()
 
 def reset():
+    """Wipes the recipe and chemical libraries."""
     commands.chemical.reset()
     commands.recipe.reset()

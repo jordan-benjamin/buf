@@ -80,7 +80,7 @@ def calculate_amount_to_add(buffer_volume_in_litres: float, concentration: str, 
         magnitude = magnitude / 100 * buffer_volume_in_litres
         symbol = "L"
 
-    return unit.scale_and_round_unit_quantity(magnitude, symbol)
+    return unit.scale_and_round_physical_quantity(magnitude, symbol)
 
 def get_recipe(recipe_name: str):
     """Return the Recipe object corresponding to the given name."""

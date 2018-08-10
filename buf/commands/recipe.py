@@ -2,6 +2,8 @@
 # Author: Jordan Juravsky
 # Date created: 31-07-2018
 
+"""Module for manipulating one's library of buffer/solution recipes."""
+
 from buf import unit, user_input, error_messages
 from buf.commands import chemical
 from typing import Sequence
@@ -38,11 +40,15 @@ Using 'buf recipe -a recipes.txt' would add these two recipes to your library.
 To delete a recipe, use 'buf recipe -d <recipe_name>'. To skip the program asking you to confirm your decision, use \
 the '--confirm' option.
 
-To view the contents of a recipe, use 'buf recipe <recipe_name>'."""
+To view the contents of a recipe, use 'buf recipe <recipe_name>'.
+
+To view all the recipes in your library, use 'buf recipe'.
+"""
 
 recipe_library_file = os.path.join(os.path.dirname(__file__), "../library/recipes.txt")
 
 def recipe(options: dict):
+    """Parses command line options, calling the appropriate functions."""
     if options["-a"]:
         add_single_recipe(options["<recipe_name>"], options["<concentrations>"], options["<chemical_names>"])
     elif options["-d"]:
@@ -58,6 +64,7 @@ def recipe(options: dict):
 
 def make_safe_recipe(name: str, concentrations: Sequence[str], chemical_names : Sequence[str],
                      chemical_library: dict = None, recipe_library: dict = None):
+    """Type checks user input, creating a Recipe object if the input is valid."""
 
     if chemical_library == None:
         chemical_library = chemical.load_chemicals()
@@ -91,6 +98,9 @@ def make_safe_recipe(name: str, concentrations: Sequence[str], chemical_names : 
     return Recipe(name, concentrations, chemical_names)
 
 class Recipe:
+    """Record storing a recipe's name as well as its contents, given by two lists or chemical names and concentrationss.
+    For example, to make a recipe with the contents '2M NaCl 10% glycerol', the concentrations list would be ["2M", "10"]
+    and the chemical_names list would be ["NaCl", "glycerol"]"""
     def __init__(self, name: str, concentrations: Sequence[str], chemical_names: Sequence[str]):
 
         self.name = name
@@ -98,9 +108,11 @@ class Recipe:
         self.chemical_names = chemical_names
 
     def get_contents(self):
+        """Returns a list of tuples, with the format of each tuple being (chemical_concentration, chemical_name)."""
         return [(concentration, chemical_name) for concentration, chemical_name in zip(self.concentrations, self.chemical_names)]
 
     def get_contents_string(self):
+        """Returns the contents of the recipe as a string, e.g. '2M NaCl 10% glycerol'."""
         string = str(self.concentrations[0]) + " " + str(self.chemical_names[0])
         for concentration, chemical_name in zip(self.concentrations[1:], self.chemical_names[1:]):
             string += " " + str(concentration) + " " + str(chemical_name)
@@ -120,7 +132,7 @@ class Recipe:
 # --------------------------------------------------------------------------------
 
 def add_single_recipe(name: str, concentrations: Sequence[str], chemical_names: Sequence[str]):
-
+    """Adds a single recipe to the library"""
     new_recipe = make_safe_recipe(name, concentrations, chemical_names)
 
     with open(recipe_library_file, "a") as file:
@@ -128,6 +140,13 @@ def add_single_recipe(name: str, concentrations: Sequence[str], chemical_names: 
 
 
 def add_recipes_from_file(filename : str):
+    """Parses specified file, adding a recipe to the library for each line in the file.
+    Each line in the file should first contain the recipe's name, followed by a list of contents.
+    All words should be separated by spaces. Example file:
+
+    recipe_a 10% glycerol 2M NaCl
+    recipe_b 20mM KCl 4g DTT
+    """
     if os.path.isfile(filename) == False:
         error_messages.file_not_found(filename)
 
@@ -155,9 +174,8 @@ def add_recipes_from_file(filename : str):
 
             recipe_name = words[0]
 
-            # TODO: is this readable?
-            concentrations = [words[i] for i in range(1, len(words), 2)]
-            chemical_names = [words[i] for i in range(2, len(words), 2)]
+            concentrations = words[1::2]
+            chemical_names = words[2::2]
 
 
             new_recipe_object = make_safe_recipe(recipe_name, concentrations, chemical_names, chemical_library=existing_chemical_library,
@@ -184,6 +202,7 @@ def add_recipes_from_file(filename : str):
 # --------------------------------------------------------------------------------
 
 def display_recipe_information(recipe_name: str):
+    """Displays the name and contents of a specified recipe."""
     recipe_library = load_recipes()
 
     if recipe_name not in recipe_library:
@@ -196,6 +215,7 @@ def display_recipe_information(recipe_name: str):
     print("Contents:", recipe_object.get_contents_string())
 
 def display_recipe_library():
+    """Displays the names and contents of all recipes in the library."""
     print("The recipes in your library are:")
 
     recipe_library = load_recipes()
@@ -211,6 +231,7 @@ def display_recipe_library():
 # --------------------------------------------------------------------------------
 
 def load_recipes():
+    """Loads recipe library from file."""
     recipes = {}
     chemical_library = chemical.load_chemicals()
 
@@ -236,11 +257,13 @@ def load_recipes():
         error_messages.library_load_error(lower_case_library_name= "recipe")
 
 def save_recipe_library(recipe_library: dict):
+    """Saves recipe library to file."""
     with open(recipe_library_file, "w") as file:
         for recipe_object in recipe_library.values():
             file.write(str(recipe_object) + "\n")
 
 def reset():
+    """Wipes the library."""
     with open(recipe_library_file, "w") as file:
         pass
 
@@ -249,6 +272,7 @@ def reset():
 # --------------------------------------------------------------------------------
 
 def delete_recipe(recipe_name: str, prompt_for_confirmation: bool = True):
+    """Removes a specified recipe from the library."""
     recipe_library = load_recipes()
 
     if recipe_name not in recipe_library:
