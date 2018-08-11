@@ -8,7 +8,7 @@ with open("LICENSE", "r") as file:
       license_text = file.read()
 
 setup(name='buf',
-      version='1.0.0a2',
+      version='1.0.0a3',
       description='For easily making chemical buffers and solutions',
       long_description= long_description,
       long_description_content_type = "text/x-rst",
