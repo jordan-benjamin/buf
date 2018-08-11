@@ -1,2 +1,3 @@
 include README.rst
 graft buf/library
+include LICENSE
