@@ -23,20 +23,21 @@ general_help_docstring = """
 Welcome to buf! Here's a brief overview of the program:
 
 buf chemical:
-    Allows you to modify and add to your chemical library. 
+    Manage your chemical library. 
     
     View entire chemical library: buf chemical
     View information about a specific chemical: buf chemical <chemical_name>
     
     Add a chemical: buf chemical -a <molar_mass> <chemical_names>...
     Add multiple chemicals to your library, as specified in a file: buf chemical -a <file_name>
+    
     Nickname a chemical (attach additional names to a library entry): buf chemical -n <existing_chemical_name> <nicknames>...
     
     Delete a chemical: buf chemical -d <chemical_name> [--complete] [--confirm]
 
 
 buf recipe:
-    Allows you to define and edit buffer/solution recipes.
+    Manage your library of buffer/solution recipes.
     
     View entire recipe library: buf recipe
     View information about a specific recipe: buf recipe <recipe_name>
@@ -54,7 +55,7 @@ buf make:
     Define a recipe as you make it: buf make <volume> (<concentration> <chemical_name>)...
 
 
-For detailed about a specific subcommand, use 'buf help <subcommand_name>'.
+For details about a specific subcommand, use 'buf help <subcommand_name>'.
 """
 
 def help(options):
