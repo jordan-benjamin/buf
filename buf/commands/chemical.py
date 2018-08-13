@@ -150,7 +150,7 @@ def add_chemicals_from_file(filename : str):
             if len(words) == 0:
                 continue
             elif len(words) < 2:
-                error_messages.invalid_line_in_chemical_file(line_number)
+                error_messages.line_too_short_in_chemical_file(line_number, line)
 
             molar_mass = words[0]
             names = words[1:]
@@ -165,6 +165,7 @@ def add_chemicals_from_file(filename : str):
             new_chemical_objects.append(new_chemical)
 
         except:
+            raise Exception
             error_messages.add_from_file_termination(line_number, upper_case_data_type="Chemicals")
 
     with open(chemical_library_file, "a") as file:
@@ -305,4 +306,4 @@ def display_chemical_library():
     # Key is the chemical's name (the first item in each tuple in the list)
     table.sort(key=lambda entry: entry[0])
 
-    print(tabulate.tabulate(table, headers=["Chemical Name", "Molar Mass"], tablefmt="fancy_grid"))
+    print(tabulate.tabulate(table, headers=["Chemical Name", "Molar Mass (g/mol)"], tablefmt="fancy_grid"))

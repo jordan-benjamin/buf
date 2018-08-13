@@ -31,8 +31,8 @@ def non_positive_molar_mass(molar_mass: float):
     print("Invalid molar mass: '" + str(molar_mass) + "' must be greater than 0.")
     exit()
 
-def line_too_short_in_chemical_file(line_number: float):
-    print("Invalid line length: line" + str(line_number) + " must contain at least one name after its molar mass. For "
+def line_too_short_in_chemical_file(line_number: float, line: str):
+    print("Invalid line length on line " + str(line_number) + ": '" + str(line) + "'. Line must contain at least one name after its molar mass. For "
           "more information, see 'buf help chemical'.")
     exit()
 
@@ -86,7 +86,7 @@ def spaces_in_recipe_name(recipe_name: str):
 # --------------------------------------------------------------------------------
 
 def invalid_buffer_volume_unit(symbol: str):
-    print("Invalid volume unit: '" + str(symbol) + "' is not a unit of volume.")
+    print("Invalid volume unit: '" + str(symbol) + "' is not a valid unit of volume.")
     exit()
 
 def non_number_buffer_volume_magnitude(magnitude: str):
