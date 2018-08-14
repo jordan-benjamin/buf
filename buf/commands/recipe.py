@@ -224,7 +224,9 @@ def display_recipe_library():
     recipe_library = load_recipes()
 
     table = [(recipe_object.name, recipe_object.get_contents_string()) for recipe_object in recipe_library.values()]
-    table.sort(key = lambda entry: entry[0])
+
+    # Sorting by the recipe name, upper() is called so that all the upper case names don't precede all the lowercase ones.
+    table.sort(key = lambda entry: entry[0].upper())
 
     print(tabulate.tabulate(table, headers=["Recipe Name", "Contents"], tablefmt="fancy_grid"))
 

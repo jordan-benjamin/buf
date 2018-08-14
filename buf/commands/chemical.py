@@ -304,7 +304,7 @@ def display_chemical_library():
     for chemical_name, chemical_object in chemical_library.items():
         table.append((chemical_name, chemical_object.molar_mass))
 
-    # Key is the chemical's name (the first item in each tuple in the list)
-    table.sort(key=lambda entry: entry[0])
+    # Sorting by the chemical name, upper() is called so that all the upper case names don't precede all the lowercase ones.
+    table.sort(key=lambda entry: entry[0].upper())
 
     print(tabulate.tabulate(table, headers=["Chemical Name", "Molar Mass (g/mol)"], tablefmt="fancy_grid"))
