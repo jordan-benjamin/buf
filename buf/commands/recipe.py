@@ -50,7 +50,10 @@ recipe_library_file = os.path.join(os.path.dirname(__file__), "../library/recipe
 def recipe(options: dict):
     """Parses command line options, calling the appropriate functions."""
     if options["-a"]:
-        add_single_recipe(options["<recipe_name>"], options["<concentrations>"], options["<chemical_names>"])
+        if options["<file_name>"]:
+            add_recipes_from_file(options["<file_name>"])
+        else:
+            add_single_recipe(options["<recipe_name>"], options["<concentrations>"], options["<chemical_names>"])
     elif options["-d"]:
         delete_recipe(options["<recipe_name>"], prompt_for_confirmation= not options["--confirm"])
     elif options["<recipe_name>"]:
@@ -187,7 +190,7 @@ def add_recipes_from_file(filename : str):
             new_recipe_library[recipe_name] = new_recipe_object
 
         except:
-            error_messages.add_from_file_termination(line_number, upper_case_data_type="Recipes")
+            error_messages.add_from_file_termination(line_number, erroneous_line=line.strip("\n"), upper_case_data_type="Recipes")
 
     with open(recipe_library_file, "a") as file:
         # Note: dict.values() can be used here but not in chemical.add_chemicals_from_file, since chemicals can
