@@ -150,7 +150,7 @@ def add_chemicals_from_file(filename : str):
             if len(words) == 0:
                 continue
             elif len(words) < 2:
-                error_messages.line_too_short_in_chemical_file(line_number, line)
+                error_messages.line_too_short_in_chemical_file(line_number)
 
             molar_mass = words[0]
             names = words[1:]
@@ -165,8 +165,7 @@ def add_chemicals_from_file(filename : str):
             new_chemical_objects.append(new_chemical)
 
         except:
-            raise Exception
-            error_messages.add_from_file_termination(line_number, upper_case_data_type="Chemicals")
+            error_messages.add_from_file_termination(line_number, erroneous_line=line.strip("\n"), upper_case_data_type="Chemicals")
 
     with open(chemical_library_file, "a") as file:
         for new_chemical in new_chemical_objects:
@@ -188,6 +187,8 @@ def nickname_chemical(existing_chemical_name: str, new_names: Sequence[str]):
     for new_name in new_names:
         if new_name in chemical_library:
             error_messages.chemical_already_exists(new_name)
+        if " " in new_name:
+            error_messages.spaces_in_chemical_name(new_name)
 
     chemical_object = chemical_library[existing_chemical_name]
 
