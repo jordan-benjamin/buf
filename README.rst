@@ -48,4 +48,5 @@ For specific information about a subcommand, see ``buf help <subcommand_name>``.
 Version History
 ***************
 
-- 1.0.0a1: First release of buf to PyPI!
+- 1.0.0a1: First release of buf to Test PyPI!
+- 1.0.0a6: First release to PyPI proper.
