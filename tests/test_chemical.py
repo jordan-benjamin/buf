@@ -157,6 +157,15 @@ class NickNameTest(TestCase):
                         mock_print.assert_called()
                     mock_print.reset_mock()
 
+    def test_spaces_in_name(self):
+        with mock.patch("buf.commands.chemical.error_messages.spaces_in_chemical_name", side_effect = SystemExit) as mock_error:
+            nacl_chemical = chemical.Chemical(58.44, ["NaCl"])
+            with mock.patch("buf.commands.chemical.load_chemicals", return_value = {"NaCl" : nacl_chemical}):
+                with self.assertRaises(SystemExit):
+                    chemical.nickname_chemical("NaCl", ["new name"])
+                mock_error.assert_called_with("new name")
+
+
     def test_correct_write(self):
         temp_file = NamedTemporaryFile("w+")
 
