@@ -1,14 +1,13 @@
 from setuptools import setup, find_packages
+from buf import __version__
 
 
 with open("README.rst", "r") as file:
     long_description = file.read()
 
-with open("LICENSE", "r") as file:
-      license_text = file.read()
-
 setup(name='buf',
-      version='1.0.0a6',
+      version=__version__,
+      python_requires='>3',
       description='For easily making chemical buffers and solutions',
       long_description= long_description,
       long_description_content_type = "text/x-rst",
