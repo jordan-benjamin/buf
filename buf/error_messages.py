@@ -86,7 +86,7 @@ def spaces_in_recipe_name(recipe_name: str):
 # --------------------------------------------------------------------------------
 
 def invalid_buffer_volume_unit(symbol: str):
-    print("Invalid volume unit: '" + str(symbol) + "' is not a valid unit of volume.")
+    print("Invalid volume unit: '" + str(symbol) + "' is not a valid unit of volume. Valid units are:", *unit.volume_units.get_symbols())
     exit()
 
 def non_number_buffer_volume_magnitude(magnitude: str):
