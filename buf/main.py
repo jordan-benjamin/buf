@@ -5,6 +5,7 @@
 """Entry point when calling buf from the command line, parses command line arguments and passes them to appropriate modules in buf.commands"""
 
 from docopt import docopt
+from buf import __version__
 import sys
 
 if __name__ == '__main__':
@@ -18,6 +19,7 @@ docstring = """
 buf
 
 Usage:
+    buf --version
     buf help
     buf help <subcommand_name>
     buf chemical
@@ -41,7 +43,7 @@ def main():
     the same name is called. For example, using the 'buf chemical <args>... [options]' subcommand
     in turn calls buf.commands.chemical.chemical, passing in the dictionary of command line options
     as a parameter."""
-    options = docopt(docstring, help=False)
+    options = docopt(docstring, help=False, version=__version__)
     for k, v in options.items():
         if v:
             if hasattr(commands, k):
