@@ -1,18 +1,18 @@
 from setuptools import setup, find_packages
-from buf import __version__
-
 
 with open("README.rst", "r") as file:
     long_description = file.read()
 
 setup(name='buf',
-      version=__version__,
-      python_requires='>3',
+      version="1.0.0a7",
+      python_requires='>=3.5',
       description='For easily making chemical buffers and solutions',
       long_description= long_description,
       long_description_content_type = "text/x-rst",
       classifiers=[
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent"
       ],
