@@ -71,6 +71,9 @@ class UnitLadder:
     def __contains__(self, item):
         return item in self.symbol_to_info
 
+    def get_symbols(self):
+        return list(self.symbol_to_info.keys())
+
     def get_scale_factor(self, symbol):
         """Return the scale factor of a given unit."""
         return self.symbol_to_info[symbol].scale_factor
