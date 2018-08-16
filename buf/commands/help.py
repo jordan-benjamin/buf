@@ -25,37 +25,40 @@ Welcome to buf! Here's a brief overview of the program:
 buf chemical:
     Manage your chemical library. 
     
-    View entire chemical library: buf chemical
-    View information about a specific chemical: buf chemical <chemical_name>
+    View entire chemical library: 'buf chemical'.
+    View information about a specific chemical: 'buf chemical <chemical_name>'. Ex. 'buf chemical NaCl'.
     
-    Add a chemical: buf chemical -a <molar_mass> <chemical_names>...
-    Add multiple chemicals to your library, as specified in a file: buf chemical -a <file_name>
+    Add a chemical: 'buf chemical -a <molar_mass> <chemical_names>...'. Ex. 'buf chemical -a 58.44 NaCl table_salt'.
+    Add multiple chemicals to your library, as specified in a file: 'buf chemical -a <file_name>'. Ex. 'buf chemical -a my_file.txt'. \
+    See 'buf help chemical' for details on file format.
     
-    Nickname a chemical (attach additional names to a library entry): buf chemical -n <existing_chemical_name> <nicknames>...
+    Nickname a chemical (attach additional names to an existing library entry): 'buf chemical -n <existing_chemical_name> <nicknames>...'. \
+    Ex. 'buf chemical -n NaCl table_salt sodium_chloride'.
     
-    Delete a chemical: buf chemical -d <chemical_name> [--complete] [--confirm]
+    Delete a chemical: 'buf chemical -d <chemical_name> [--complete] [--confirm]'. Ex. 'buf chemical -d NaCl'.
 
 
 buf recipe:
     Manage your library of buffer/solution recipes.
     
-    View entire recipe library: buf recipe
-    View information about a specific recipe: buf recipe <recipe_name>
+    View entire recipe library: 'buf recipe'.
+    View information about a specific recipe: 'buf recipe <recipe_name>'. Ex. 'buf recipe my_recipe'.
     
-    Add a recipe: buf recipe -a <recipe_name> (<concentration> <chemical_name>)...
-    Add multiple recipes to your library, as specified in a file: buf recipe -a <file_name>
+    Add a recipe: 'buf recipe -a <recipe_name> (<concentration> <chemical_name>)...'. Ex. 'buf recipe -a my_recipe 300mM NaCl 10% glycerol'.
+    Add multiple recipes to your library, as specified in a file: 'buf recipe -a <file_name>'. Ex. 'buf recipe -a my_file.txt'. \
+    See 'buf help recipe' for details on file format.
     
-    Delete a recipe: buf recipe -d <recipe_name> [--confirm]
+    Delete a recipe: 'buf recipe -d <recipe_name> [--confirm]'. Ex. 'buf recipe -d my_recipe'.
 
 
 buf make:
     Calculate the amount of each ingredient required to make a buffer/solution.
     
-    Make an already-defined recipe: buf make <volume> <recipe_name>
-    Define a recipe as you make it: buf make <volume> (<concentration> <chemical_name>)...
+    Make an already-defined recipe: 'buf make <volume> <recipe_name>'. Ex. 'buf make 250mL my_recipe'.
+    Define a recipe as you make it: 'buf make <volume> (<concentration> <chemical_name>)...'. Ex. 'buf make 2M KCl 10% glycerol'
 
 
-For details about a specific subcommand, use 'buf help <subcommand_name>'.
+For details and more example usages regarding a specific subcommand, use 'buf help <subcommand_name>'. Ex. 'buf help chemical'.
 """
 
 def help(options):
