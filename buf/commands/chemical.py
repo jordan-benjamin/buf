@@ -26,8 +26,9 @@ is equivalent to 'buf make 2L 1M salt', since both expressions refer to the same
 
 To add additional names to an existing entry in your chemical library (also known as 'nicknaming' the chemical), use \
 'buf chemical -n <existing_chemical_name> <nicknames>...'. For example, if you added NaCl to your library with 'buf chemical \
- -a 58.44 NaCl', and then nicknamed the chemical with 'buf chemical -n NaCl salt table_salt', you could use any of 'NaCl', 'salt', \
- or 'table_salt' to refer to the same molar mass.
+-a 58.44 NaCl', and then nicknamed the chemical with 'buf chemical -n NaCl salt table_salt', you could use any of 'NaCl', 'salt', \
+or 'table_salt' to refer to the same molar mass. Note that using 'buf chemical -a 58.44 NaCl table_salt salt' is equivalent to using \
+'buf chemical -a 58.44 NaCl' followed by 'buf chemical -n NaCl table_salt salt'. 
  
 Another way to add chemicals to your library is by specifying a list of them in a text file. This file should contain one chemical \
 per line, where the first word on each line specifies the chemical's molar mass, followed by the list of the chemical's names. Spaces should \
