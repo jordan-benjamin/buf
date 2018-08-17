@@ -31,8 +31,14 @@ def make(options: dict):
     """Parse command line options, calling the appropriate function."""
     if options["<recipe_name>"]:
         recipe_object = get_recipe(options["<recipe_name>"])
+
+        # Checking to make sure all the chemicals in the recipe contents (that have concentrations in molar) exist in the user's
+        # chemical library. While this was true when the recipe was created, it might not be now as the user might have deleted chemicals
+        # since defining the recipe.
+        recipe.assert_recipe_validity(recipe_object, recipe_library={}, check_existing_chemicals=True)
     else:
-        recipe_object = recipe.make_safe_recipe("temp", options["<concentrations>"], options["<chemical_names>"], recipe_library= {})
+        recipe_object = recipe.make_safe_recipe("temp", options["<concentrations>"], options["<chemical_names>"], recipe_library= {},
+                                                check_existing_chemicals=True)
 
     buffer_volume_in_litres = get_buffer_litres(options["<volume>"])
 

@@ -65,41 +65,6 @@ def recipe(options: dict):
 # ----------------------------RECIPE DEFINITION AND CREATION----------------------
 # --------------------------------------------------------------------------------
 
-def make_safe_recipe(name: str, concentrations: Sequence[str], chemical_names : Sequence[str],
-                     chemical_library: dict = None, recipe_library: dict = None):
-    """Type checks user input, creating a Recipe object if the input is valid."""
-
-    if chemical_library == None:
-        chemical_library = chemical.load_chemicals()
-    if recipe_library == None:
-        recipe_library = load_recipes()
-
-    if name in recipe_library:
-        error_messages.recipe_already_exists(name)
-
-    if " " in name:
-        error_messages.spaces_in_recipe_name(name)
-
-    for concentration, chemical_name in zip(concentrations, chemical_names):
-
-        magnitude, symbol = unit.split_unit_quantity(concentration)
-
-        if symbol not in unit.valid_units:
-            error_messages.invalid_concentration_unit(symbol)
-
-        if symbol in unit.concentration_units and chemical_name not in chemical_library:
-            error_messages.chemical_not_found(chemical_name)
-
-        try:
-            float_magnitude = float(magnitude)
-        except:
-            error_messages.non_number_concentration_magnitude(magnitude)
-
-        if float_magnitude <= 0:
-            error_messages.non_positive_concentration_magnitude(float_magnitude)
-
-    return Recipe(name, concentrations, chemical_names)
-
 class Recipe:
     """Record storing a recipe's name as well as its contents, given by two lists or chemical names and concentrationss.
     For example, to make a recipe with the contents '2M NaCl 10% glycerol', the concentrations list would be ["2M", "10"]
@@ -129,6 +94,52 @@ class Recipe:
 
     def __eq__(self, other):
         return self.name == other.name and set(self.get_contents()) == set(other.get_contents())
+
+def assert_recipe_validity(recipe_object: Recipe, chemical_library: dict = None, recipe_library: dict = None,
+                           check_existing_chemicals: bool = True):
+
+    if chemical_library == None and check_existing_chemicals == True:
+        chemical_library = chemical.load_chemicals()
+    if recipe_library == None:
+        recipe_library = load_recipes()
+
+    if recipe_object.name in recipe_library:
+        error_messages.recipe_already_exists(recipe_object.name)
+
+    if " " in recipe_object.name:
+        error_messages.spaces_in_recipe_name(recipe_object.name)
+
+    for concentration, chemical_name in zip(recipe_object.concentrations, recipe_object.chemical_names):
+
+        magnitude, symbol = unit.split_unit_quantity(concentration)
+
+        if symbol not in unit.valid_units:
+            error_messages.invalid_concentration_unit(symbol)
+
+        if check_existing_chemicals:
+            if symbol in unit.concentration_units and chemical_name not in chemical_library:
+                error_messages.chemical_not_found(chemical_name)
+
+        try:
+            float_magnitude = float(magnitude)
+        except:
+            error_messages.non_number_concentration_magnitude(magnitude)
+
+        if float_magnitude <= 0:
+            error_messages.non_positive_concentration_magnitude(float_magnitude)
+
+
+def make_safe_recipe(name: str, concentrations: Sequence[str], chemical_names : Sequence[str],
+                     chemical_library: dict = None, recipe_library: dict = None, check_existing_chemicals: bool = True):
+    """Type checks user input, creating a Recipe object if the input is valid."""
+
+    new_recipe = Recipe(name, concentrations, chemical_names)
+
+    assert_recipe_validity(new_recipe, chemical_library=chemical_library, recipe_library=recipe_library,
+                           check_existing_chemicals= check_existing_chemicals)
+
+    return new_recipe
+
 
 # --------------------------------------------------------------------------------
 # ----------------------------------ADDING RECIPES--------------------------------
@@ -238,7 +249,6 @@ def display_recipe_library():
 def load_recipes():
     """Loads recipe library from file."""
     recipes = {}
-    chemical_library = chemical.load_chemicals()
 
     try:
         with open(recipe_library_file, "r") as file:
@@ -254,7 +264,7 @@ def load_recipes():
                     concentrations.append(words[index])
                     chemical_names.append(words[index+1])
 
-                recipe = make_safe_recipe(name, concentrations, chemical_names, chemical_library=chemical_library, recipe_library=recipes)
+                recipe = make_safe_recipe(name, concentrations, chemical_names, recipe_library=recipes, check_existing_chemicals=False)
                 recipes[name] = recipe
 
         return recipes
