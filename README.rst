@@ -51,3 +51,4 @@ Version History
 - 1.0.0a1: First release of buf to Test PyPI!
 - 1.0.0a6: First release to PyPI proper.
 - 1.0.0a7: Improved documentation.
+- 1.0.0a8: Bug fixes.
