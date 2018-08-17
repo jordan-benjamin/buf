@@ -42,7 +42,7 @@ def main():
     the same name is called. For example, using the 'buf chemical <args>... [options]' subcommand
     in turn calls buf.commands.chemical.chemical, passing in the dictionary of command line options
     as a parameter."""
-    options = docopt(docstring, help=False, version="1.0.0a7")
+    options = docopt(docstring, help=False, version="1.0.0a8")
     for k, v in options.items():
         if v:
             if hasattr(commands, k):
