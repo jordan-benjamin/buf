@@ -2,12 +2,16 @@
 # Author: Jordan Juravsky
 # Date created: 14-08-2018
 
+"""Tests the buf.commands.help module."""
+
 from unittest import mock, TestCase
 from buf import commands
 from inspect import getmembers, ismodule
 from buf.commands import help
 
 class TestHelp(TestCase):
+    """Wrapper class for testing the entire module."""
+
     def test_invalid_name_catch(self):
         """Tests that calling 'buf help' with an invalid module name will raise the appropriate error."""
         with mock.patch("buf.commands.help.error_messages.subcommand_not_found", side_effect = SystemExit) as mock_error:

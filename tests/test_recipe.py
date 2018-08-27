@@ -2,6 +2,8 @@
 # Author: Jordan Juravsky
 # Date created: 31-07-2018
 
+"""Tests buf.commands.recipe."""
+
 from unittest import mock, TestCase
 
 from tempfile import NamedTemporaryFile
@@ -12,33 +14,39 @@ from io import StringIO
 from buf.commands import recipe
 
 
-class MakeRecipeTest(TestCase):
+class TestMakeSafeRecipe(TestCase):
+    """Tests recipe.make_safe_recipe (and recipe.assert_recipe_validity by proxy, since the former is simply \
+    a wrapper for the latter, as make_safe_recipe simply returns the Recipe type-checked by assert_recipe_validity)."""
 
     def test_spaces_in_name(self):
+        """Tests that the function checks that the recipe name does not contain spaces."""
         with mock.patch("buf.commands.recipe.load_recipes", return_value = {}):
             with self.assertRaises(SystemExit):
-                should_crash = recipe.make_safe_recipe("contains spaces", ["10%"], ["glycerol"])
+                 recipe.make_safe_recipe("contains spaces", ["10%"], ["glycerol"])
 
-            shouldnt_crash = recipe.make_safe_recipe("doesnt_contain_spaces", ["10%"], ["glycerol"])
 
     def test_existing_chemical_check(self):
+        """Tests that the function checks that the chemicals specified in the recipe exist in the chemical library, \
+        if their concentration is specified in molar."""
 
-            with mock.patch("buf.commands.recipe.print") as mock_print:
-                # Testing the code stops if no matching chemical
-                with self.assertRaises(SystemExit):
-                    recipe.make_safe_recipe("boop", ["300mM"], ["Salt"], chemical_library= {}, recipe_library={})
-                    mock_print.assert_called()
+        with mock.patch("buf.commands.recipe.print") as mock_print:
+            # Testing the code stops if a chemical's concentration is specified in molar, but the chemical name cannot be found
+            # in the chemical library.
+            with self.assertRaises(SystemExit):
+                recipe.make_safe_recipe("boop", ["300mM"], ["Salt"], chemical_library= {}, recipe_library={})
+                mock_print.assert_called()
 
-                mock_print.reset_mock()
+            mock_print.reset_mock()
 
-                # Testing code words if chemical exists. Also verifies that a chemical is only checked to exist in the chemical
-                # library if concentration is specified in molar (i.e. glycerol not in library, should not be checked since concentration
-                # is in % volume).
-                recipe.make_safe_recipe("boop", ["300mM", "10%"], ["salt", "glycerol"], chemical_library={"salt" : None}, recipe_library= {})
-                mock_print.assert_not_called()
+            # Verifies that a chemical is only checked to exist in the chemical library if concentration is
+            # specified in molar (e.g. here, glycerol is not in the chemical library, yet it does not matter since its
+            # concentration is specified in % volume).
+            recipe.make_safe_recipe("boop", ["300mM", "10%"], ["salt", "glycerol"], chemical_library={"salt" : None}, recipe_library= {})
+            mock_print.assert_not_called()
 
 
     def test_unit_validity(self):
+        """Tests that the function checks that all concentration values have valid units."""
         with mock.patch("buf.commands.recipe.print") as mock_print:
             # Testing valid units.
             for unit in ["M", "L", "ug"]:
@@ -54,7 +62,8 @@ class MakeRecipeTest(TestCase):
                     mock_print.assert_called()
                     mock_print.reset_mock()
 
-    def test_quantity_validity(self):
+    def test_magnitude_validity(self):
+        """Testing that the function checks that the magnitude of each concentration value is a positive number."""
         with mock.patch("buf.commands.recipe.print") as mock_print:
 
             # Testing valid quantities.
@@ -70,12 +79,19 @@ class MakeRecipeTest(TestCase):
                     mock_print.assert_called()
                     mock_print.reset_mock()
 
+class TestRecipe(TestCase):
+    """Tests the recipe.Recipe class."""
+
     def test_string_cast(self):
+        """Tests the cast of a Recipe to a string."""
         with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={"salt": None, "pepper" : None}):
             test_recipe = recipe.Recipe("name", ["300mM", "4L"], ["salt", "pepper"])
             self.assertEqual(str(test_recipe), "name 300mM salt 4L pepper")
 
     def equals_check(self):
+        """Testing that two Recipes with identical names and contents are equal. Also checks the case when the
+        contents of two Recipes are identical but are in different orders (e.g. Recipe A has contents of "2M salt 10%
+        glycerol", while Recipe B has contents  "10% glycerol 2M salt". These two Recipes should be equal). """
         with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={"salt": None, "pepper": None}):
 
             # Changing all possible variables (name, units, chemical name, concentration)
@@ -99,44 +115,30 @@ class MakeRecipeTest(TestCase):
             self.assertEqual(forwards_recipe, backwards_recipe)
 
 
-class IntegratedTests(TestCase):
+class TestAddRecipesFromFile(TestCase):
+    """Tests recipe.add_recipe_from_file."""
 
-    def test_read_write(self):
-        with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={"salt": None, "pepper": None}):
-
-            tmp_file = NamedTemporaryFile()
-            with mock.patch("buf.commands.recipe.recipe_library_file", tmp_file.name):
-
-                first_recipe = recipe.Recipe("name", ["300mM"], ["salt"])
-                second_recipe = recipe.Recipe("other", ["4M"], ["pepper"])
-
-                correct_dict = {"name": first_recipe, "other": second_recipe}
-
-                with mock.patch("buf.commands.recipe.load_recipes", return_value = {}):
-
-                    recipe.add_single_recipe("name", ["300mM"], ["salt"])
-                    recipe.add_single_recipe("other", ["4M"], ["pepper"])
-
-                recipes = recipe.load_recipes()
-
-                self.assertEqual(len(recipes), len(correct_dict))
-
-                for key, value in correct_dict.items():
-                    self.assertTrue(key in recipes)
-                    self.assertEqual(value, recipes[key])
-
-class TestAddFromFile(TestCase):
-
-    def test_errors(self):
+    def test_invalid_file_name(self):
+        """Tests that the function checks whether """
         with mock.patch("buf.commands.recipe.open") as mock_open:
             with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value = {"Arg" : None, "KCl" : None,  "salt" : None, "pepper" : None}):
                 with mock.patch("buf.commands.recipe.load_recipes", return_value = {"wash" : None, "elution" : None}):
                     with mock.patch("buf.commands.recipe.print") as mock_print:
+                        with mock.patch("buf.commands.recipe.os.path.isfile", return_value = False):
 
-                        # Testing an invalid file name.
-                        with self.assertRaises(SystemExit):
-                            recipe.add_recipes_from_file("invalidfile")
+                            # Testing an invalid file name.
+                            with self.assertRaises(SystemExit):
+                                recipe.add_recipes_from_file("invalidfile")
 
+    def test_invalid_file_contents(self):
+        """Tests that the function raises SystemExit (i.e. cleanly exits the program opposed to crashing) \
+            when the specified file has invalid contents (see recipe.instructions for more information on what \
+            constitutes a valid file)."""
+
+        with mock.patch("buf.commands.recipe.open") as mock_open:
+            with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value = {"Arg" : None, "KCl" : None,  "salt" : None, "pepper" : None}):
+                with mock.patch("buf.commands.recipe.load_recipes", return_value = {"wash" : None, "elution" : None}):
+                    with mock.patch("buf.commands.recipe.print") as mock_print:
                         with mock.patch("buf.commands.recipe.os.path.isfile", return_value = True):
 
                             # Invalid file contents
@@ -159,6 +161,7 @@ class TestAddFromFile(TestCase):
 
 
     def test_correct_writing(self):
+        """Tests that the function correctly appends the newly created recipes to the library file."""
         with mock.patch("buf.commands.recipe.print") as mock_print:
             with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value = {"Arg" : None, "KCl" : None,
                                                                                             "salt" : None, "pepper" : None}):
@@ -179,9 +182,12 @@ class TestAddFromFile(TestCase):
                     self.assertEqual(contents, "wash 3M salt 10% pepper\nelution 4g Arg\nrefold 4% KCl 3M salt\nother 4M Arg 10.5L pepper\n")
                     mock_print.assert_called()
 
-class SaveRecipeLibraryTest(TestCase):
+class TestSaveRecipeLibrary(TestCase):
+    """Tests recipe.save_recipe_library."""
 
     def test_read_write(self):
+        """Tests that the loading, saving, and again loading the recipe library leaves it unchanged."""
+
         # No need to include Arg and glycerol in library since existing chemicals are only checked for if their concentration is in molar.
         with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value = {"salt" : None, "pepper" : None}):
             temp_file = NamedTemporaryFile("w+")
@@ -200,16 +206,18 @@ class SaveRecipeLibraryTest(TestCase):
                 self.assertEqual(read_recipe_dict, read_again)
 
 class TestDeleteRecipe(TestCase):
+    """Tests recipe.delete_recipe."""
 
-    def test_errors(self):
-
-        with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value = {"salt" : None, "pepper" : None}):
+    def test_name_check(self):
+        """Tests that the function checks that the specified recipe to delete exists in the library."""
+        with mock.patch("buf.commands.recipe.load_recipes", return_value = {}):
             with mock.patch("buf.commands.recipe.print") as mock_print:
                 with self.assertRaises(SystemExit):
                     recipe.delete_recipe("unknown_recipe")
                     mock_print.assert_called()
 
     def test_delete(self):
+        """Tests the removal of the specified recipe from the library."""
         with mock.patch("buf.commands.recipe.chemical.load_chemicals", return_value={"salt": None, "pepper": None}):
 
             temp_file = NamedTemporaryFile("w+")
@@ -228,9 +236,11 @@ class TestDeleteRecipe(TestCase):
 
                 self.assertEqual(after_delete, recipe.load_recipes())
 
-class DisplayRecipeInformationTest(TestCase):
+class TestDisplayRecipeInformation(TestCase):
+    """Tests recipe.display_recipe_information"""
 
-    def test_errors(self):
+    def test_name_check(self):
+        """Tests that the function checks that the recipe to display exists."""
         with mock.patch("buf.commands.recipe.load_recipes", return_value = {}):
             with self.assertRaises(SystemExit):
                 recipe.display_recipe_information("unknown_recipe")
