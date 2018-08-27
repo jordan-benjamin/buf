@@ -4,7 +4,7 @@
 
 """Module for manipulating one's library of buffer/solution recipes."""
 
-from buf import unit, user_input, error_messages
+from buf import unit, user_input, error_messages, libraries
 from buf.commands import chemical
 from typing import Sequence
 import os
@@ -45,7 +45,7 @@ To view the contents of a recipe, use 'buf recipe <recipe_name>'.
 To view all the recipes in your library, use 'buf recipe'.
 """
 
-recipe_library_file = os.path.join(os.path.dirname(__file__), "../library/recipes.txt")
+recipe_library_file = libraries.fetch_library_file_path("recipes.txt")
 
 def recipe(options: dict):
     """Parses command line options, calling the appropriate functions."""
@@ -97,6 +97,10 @@ class Recipe:
 
 def assert_recipe_validity(recipe_object: Recipe, chemical_library: dict = None, recipe_library: dict = None,
                            check_existing_chemicals: bool = True):
+
+    """Checks that a given Recipe object is valid (i.e. all concentration have both valid magnitudes and units,
+     the chemicals specified in the recipe are in the chemical library if their concentration is specified in molar,
+     and that a recipe with the same name doesn't already exist in the recipe library)."""
 
     if chemical_library == None and check_existing_chemicals == True:
         chemical_library = chemical.load_chemicals()

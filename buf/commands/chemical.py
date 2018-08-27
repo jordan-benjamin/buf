@@ -7,7 +7,7 @@
 
 import os
 import tabulate
-from buf import user_input, error_messages
+from buf import user_input, error_messages, libraries
 from typing import Sequence
 
 instructions = """buf chemical:
@@ -51,7 +51,7 @@ To view information about a specific chemical (its molar mass and additional nam
 chemical library, use 'buf chemical'.
 """
 
-chemical_library_file = os.path.join(os.path.dirname(__file__), "../library/chemicals.txt")
+chemical_library_file = libraries.fetch_library_file_path("chemicals.txt")
 
 def chemical(options : dict):
     """Parses dictionary of command line options and calls appropriate functions."""
@@ -116,7 +116,7 @@ def make_safe_chemical(molar_mass : str, names : list, chemical_library: dict = 
 # --------------------------------ADDING CHEMICALS--------------------------------
 # --------------------------------------------------------------------------------
 
-def add_single_chemical(molar_mass: str, names: Sequence[str]):
+def add_single_chemical(molar_mass: str, names: Sequence[str]):    
     """Adds single chemical to library."""
     new_chemical = make_safe_chemical(molar_mass, names)
     with open(chemical_library_file, "a") as file:
