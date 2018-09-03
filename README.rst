@@ -48,10 +48,9 @@ For specific information about a subcommand, see ``buf help <subcommand_name>``.
 Version History
 ***************
 
-- 1.0.0a10: Deleting old buf/library directory (since library files are now stored outside the package), \
-updating README to describe new changes.
-- 1.0.0a9: Chemical/recipe libraries no longer reset when upgrading the package. To those using older version of buf \
-who want to keep their libraries before upgrading, the library files can be accessed in the buf/libraries directory.
+- 1.0.0a11: Fixing README format.
+- 1.0.0a10: Deleting old buf/library directory (since library files are now stored outside the package), updating README to describe new changes.
+- 1.0.0a9: Chemical/recipe libraries no longer reset when upgrading the package. To those using older version of buf who want to keep their libraries before upgrading, the library files can be accessed in the buf/libraries directory.
 - 1.0.0a8: Bug fixes.
 - 1.0.0a7: Improved documentation.
 - 1.0.0a6: First release to PyPI proper.
