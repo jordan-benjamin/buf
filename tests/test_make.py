@@ -5,6 +5,7 @@
 """Tests the buf.commands.make module."""
 
 from unittest import mock, TestCase
+import unittest
 from buf.commands import make, recipe, chemical
 from buf import unit
 
@@ -101,3 +102,6 @@ class TestGetRecipe(TestCase):
 
             # Testing a valid recipe name.
             shouldnt_crash = make.get_recipe("my_recipe")
+
+if __name__ == '__main__':
+    unittest.main()

@@ -5,6 +5,7 @@
 """Tests the buf.user_input module."""
 
 from unittest import mock, TestCase
+import unittest
 from buf import user_input
 
 class TestConfirm(TestCase):
@@ -29,3 +30,6 @@ class TestConfirm(TestCase):
             user_input.confirm()
 
         self.assertEqual(mock_input.call_count, 3)
+
+if __name__ == '__main__':
+    unittest.main()

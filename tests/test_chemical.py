@@ -2,6 +2,7 @@
 # Author: Jordan Juravsky
 # Date created: 28-07-2018
 
+import unittest
 from unittest import mock, TestCase
 from io import StringIO
 
@@ -140,8 +141,8 @@ class TestAddChemicalsFromFile(TestCase):
             file.write("100 salt pepper\n154.25 DTT\n")
 
         temp_file_to_add = NamedTemporaryFile(mode = "a+")
-        with open(temp_file_to_add.name, "a") as file:
-            file.write("74.55 KCl\n68.08 imidazole imi")
+        with open(temp_file_to_add.name, "a") as other_file:
+            other_file.write("74.55 KCl\n68.08 imidazole imi")
 
         with mock.patch("buf.commands.chemical.chemical_library_file", temp_library_file.name):
             with mock.patch("buf.commands.chemical.print") as mock_print:
@@ -276,3 +277,5 @@ class TestDeleteChemical(TestCase):
 
             self.assertEqual(after_delete, chemical.load_chemicals())
 
+if __name__ == '__main__':
+    unittest.main()

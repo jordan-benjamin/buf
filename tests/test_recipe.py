@@ -5,12 +5,9 @@
 """Tests buf.commands.recipe."""
 
 from unittest import mock, TestCase
-
+import unittest
 from tempfile import NamedTemporaryFile
-
 from io import StringIO
-
-
 from buf.commands import recipe
 
 
@@ -244,3 +241,6 @@ class TestDisplayRecipeInformation(TestCase):
         with mock.patch("buf.commands.recipe.load_recipes", return_value = {}):
             with self.assertRaises(SystemExit):
                 recipe.display_recipe_information("unknown_recipe")
+
+if __name__ == '__main__':
+    unittest.main()

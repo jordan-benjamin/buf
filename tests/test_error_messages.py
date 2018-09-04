@@ -7,6 +7,7 @@
 from buf import error_messages
 from inspect import getmembers, isfunction, signature
 from unittest import TestCase, mock
+import unittest
 
 class TestErrorMessages(TestCase):
     """Wrapper class that tests the error_messages module as a whole."""
@@ -30,3 +31,6 @@ class TestErrorMessages(TestCase):
 
                 mock_print.assert_called()
                 mock_print.reset_mock()
+
+if __name__ == '__main__':
+    unittest.main()

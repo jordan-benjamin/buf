@@ -4,6 +4,7 @@
 
 """Testing the full usage of buf from the command line."""
 
+import unittest
 from unittest import mock, TestCase
 from buf.main import line, reset
 import tabulate
@@ -89,3 +90,6 @@ class RecipeTests(TestCase):
             reset()
             line("buf recipe")
             mock_display.assert_called()
+
+if __name__ == '__main__':
+    unittest.main()

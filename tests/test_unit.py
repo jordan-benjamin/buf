@@ -5,6 +5,7 @@
 """Tests the buf.unit module."""
 
 from unittest import mock, TestCase
+import unittest
 from buf import unit
 
 class TestSplitUnitQuantity(TestCase):
@@ -101,3 +102,6 @@ class TestScaleAndRoundUnitQuantity(TestCase):
         self.assertEqual(unit.scale_and_round_physical_quantity(123.456, "L"), "123.46L")
         self.assertEqual(unit.scale_and_round_physical_quantity(0.123456, "L"), "123.46mL")
         self.assertEqual(unit.scale_and_round_physical_quantity(10089, "µL"), "10.09mL")
+
+if __name__ == '__main__':
+    unittest.main()

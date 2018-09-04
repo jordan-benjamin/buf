@@ -5,6 +5,7 @@
 """Tests buf.libraries."""
 
 from unittest import TestCase, mock
+import unittest
 from buf import libraries
 import os
 import sys
@@ -70,3 +71,7 @@ class TestAddLibraryFile(TestCase):
                 with mock.patch("buf.libraries.open") as mock_open:
                     libraries.add_library_file(test_file_name)
                     mock_open.assert_called_with(test_file_path, "w")
+
+
+if __name__ == '__main__':
+    unittest.main()

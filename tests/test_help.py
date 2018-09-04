@@ -5,6 +5,7 @@
 """Tests the buf.commands.help module."""
 
 from unittest import mock, TestCase
+import unittest
 from buf import commands
 from inspect import getmembers, ismodule
 from buf.commands import help
@@ -38,3 +39,6 @@ class TestHelp(TestCase):
             options_dict = {"<subcommand_name>" : None}
             help.help(options_dict)
             mock_print.assert_called_with(help.general_help_docstring)
+
+if __name__ == '__main__':
+    unittest.main()
