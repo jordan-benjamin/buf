@@ -4,7 +4,7 @@ buf help
 Subcommand Description
 +++++++++++++++++++++++
 ``buf help`` allows you to access documentation and usage instructions for buf and all of its subcommands. The \
-content of the documentation output by ``buf help`` is identical to that of this site.
+content of the documentation provided by ``buf help`` is identical to that of this site.
 
 Usage
 ++++++

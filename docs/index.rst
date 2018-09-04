@@ -15,7 +15,7 @@ how much of each chemical you need to weight out when making solutions? Buf can 
 #. Allows you to develop a chemical library, saving the molar masses of frequently used chemicals.
 #. Allows you to use those chemicals to define recipes for your buffers/solutions, in which you specify \
    the concentration of each ingredient required to make the buffer.
-#. Will 'make' those recipes for you, calculating how much of each ingredient you require to produce the volume of buffer you specify.
+#. Will 'make' those recipes for you, calculating how much of each ingredient you require to produce the volume of solution you specify.
 
 Installation
 ------------
