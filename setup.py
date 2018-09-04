@@ -10,14 +10,13 @@ setup(name='buf',
       long_description= long_description,
       long_description_content_type = "text/x-rst",
       classifiers=[
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent"
       ],
       keywords='buf chemistry buffer solution salt',
-      # TODO: add URL
+      url = "https://github.com/jordan-benjamin/buf.git",
       author='Jordan Juravsky',
       author_email='jordan@mindcharger.com',
       packages=find_packages(),
