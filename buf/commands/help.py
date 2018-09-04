@@ -30,10 +30,10 @@ buf chemical:
     
     Add a chemical: 'buf chemical -a <molar_mass> <chemical_names>...'. Ex. 'buf chemical -a 58.44 NaCl table_salt'.
     Add chemicals from a file: 'buf chemical -a <file_name>'. Ex. 'buf chemical -a my_file.txt'. \
-    See 'buf help chemical' for details on file format.
+See 'buf help chemical' for details on file format.
     
     Nickname a chemical (attach additional names to an existing library entry): 'buf chemical -n <existing_chemical_name> <nicknames>...'. \
-    Ex. 'buf chemical -n NaCl table_salt sodium_chloride'.
+Ex. 'buf chemical -n NaCl table_salt sodium_chloride'.
     
     Delete a chemical: 'buf chemical -d <chemical_name> [--complete] [--confirm]'. Ex. 'buf chemical -d NaCl'.
 
@@ -46,7 +46,7 @@ buf recipe:
     
     Add a recipe: 'buf recipe -a <recipe_name> (<concentration> <chemical_name>)...'. Ex. 'buf recipe -a my_recipe 300mM NaCl 10% glycerol'.
     Add recipes from a file: 'buf recipe -a <file_name>'. Ex. 'buf recipe -a my_file.txt'. \
-    See 'buf help recipe' for details on file format.
+See 'buf help recipe' for details on file format.
     
     Delete a recipe: 'buf recipe -d <recipe_name> [--confirm]'. Ex. 'buf recipe -d my_recipe'.
 
