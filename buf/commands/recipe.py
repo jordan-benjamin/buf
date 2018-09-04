@@ -14,7 +14,8 @@ instructions = """buf recipe:
 
 This subcommand allows you to access and modify your recipe library. A recipe is a description of the \
 contents of a buffer or solution. It takes the form of a list of chemical names preceded by their concentrations, \
-for example '300mM NaCl 10% glycerol'.
+for example '300mM NaCl 10% glycerol'. Developing a library of your frequently used recipes is useful, allowing you \
+to skip the listing of a solution's contents when making it (see 'buf make').
 
 Chemical concentrations can be specified in a number of ways. One common method, shown in the example above, is \
 with molarity. Note that before one can specify a chemical's concentration in molar, that chemical's molar mass must \
@@ -40,9 +41,7 @@ Using 'buf recipe -a recipes.txt' would add these two recipes to your library.
 To delete a recipe, use 'buf recipe -d <recipe_name>'. To skip the program asking you to confirm your decision, use \
 the '--confirm' option.
 
-To view the contents of a recipe, use 'buf recipe <recipe_name>'.
-
-To view all the recipes in your library, use 'buf recipe'.
+To view the contents of a recipe, use 'buf recipe <recipe_name>'. To view all the recipes in your library, use 'buf recipe'.
 """
 
 recipe_library_file = libraries.fetch_library_file_path("recipes.txt")

@@ -4,8 +4,8 @@ with open("README.rst", "r") as file:
     long_description = file.read()
 
 setup(name='buf',
-      version="1.0.0a11",
-      python_requires='>=3.5',
+      version="1.0.0",
+      python_requires='>=3.6',
       description='For easily making chemical buffers and solutions',
       long_description= long_description,
       long_description_content_type = "text/x-rst",

@@ -2,7 +2,7 @@
 # Author: Jordan Juravsky
 # Date created: 01-08-2018
 
-"""Module for accessing the documentation of buf and its subcommands."""
+"""Module for accessing the docs of buf and its subcommands."""
 
 from buf import commands
 from buf import error_messages
@@ -11,9 +11,9 @@ instructions = """
 
 buf help:
 
-This subcommand provides documentation/usage instruction for all buf subcommands.
+This subcommand provides docs/usage instruction for all buf subcommands.
 
-To access the documentation for a specific subcommand, use 'buf help <subcommand_name>'.
+To access the docs for a specific subcommand, use 'buf help <subcommand_name>'.
 
 For a general overview of the program, use 'buf help'.
 """
@@ -29,7 +29,7 @@ buf chemical:
     View information about a specific chemical: 'buf chemical <chemical_name>'. Ex. 'buf chemical NaCl'.
     
     Add a chemical: 'buf chemical -a <molar_mass> <chemical_names>...'. Ex. 'buf chemical -a 58.44 NaCl table_salt'.
-    Add multiple chemicals to your library, as specified in a file: 'buf chemical -a <file_name>'. Ex. 'buf chemical -a my_file.txt'. \
+    Add chemicals from a file: 'buf chemical -a <file_name>'. Ex. 'buf chemical -a my_file.txt'. \
     See 'buf help chemical' for details on file format.
     
     Nickname a chemical (attach additional names to an existing library entry): 'buf chemical -n <existing_chemical_name> <nicknames>...'. \
@@ -45,7 +45,7 @@ buf recipe:
     View information about a specific recipe: 'buf recipe <recipe_name>'. Ex. 'buf recipe my_recipe'.
     
     Add a recipe: 'buf recipe -a <recipe_name> (<concentration> <chemical_name>)...'. Ex. 'buf recipe -a my_recipe 300mM NaCl 10% glycerol'.
-    Add multiple recipes to your library, as specified in a file: 'buf recipe -a <file_name>'. Ex. 'buf recipe -a my_file.txt'. \
+    Add recipes from a file: 'buf recipe -a <file_name>'. Ex. 'buf recipe -a my_file.txt'. \
     See 'buf help recipe' for details on file format.
     
     Delete a recipe: 'buf recipe -d <recipe_name> [--confirm]'. Ex. 'buf recipe -d my_recipe'.
@@ -55,7 +55,7 @@ buf make:
     Calculate the amount of each ingredient required to make a buffer/solution.
     
     Make an already-defined recipe: 'buf make <volume> <recipe_name>'. Ex. 'buf make 250mL my_recipe'.
-    Define a recipe as you make it: 'buf make <volume> (<concentration> <chemical_name>)...'. Ex. 'buf make 2M KCl 10% glycerol'
+    Define a recipe as you make it: 'buf make <volume> (<concentration> <chemical_name>)...'. Ex. 'buf make 2M KCl 10% glycerol'.
 
 
 For details and more example usages regarding a specific subcommand, use 'buf help <subcommand_name>'. Ex. 'buf help chemical'.
