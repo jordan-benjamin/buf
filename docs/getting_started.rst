@@ -21,7 +21,18 @@ solution; it's finally time to make it!
 Making Our Solution
 +++++++++++++++++++
 To calculate how much of each chemical we'll need for our 5L solution, all we need to use is ``buf make 5L best_recipe``. Buf \
-will use our stored chemical and recipe libraries to calculate the required amounts of each ingredient, and display the results.
+will use our stored chemical and recipe libraries to calculate the required amounts of each ingredient, and display the results. \
+You should see the following::
+
+    ╒═════════════════╤═════════════════╤═════════════════╕
+    │ Chemical Name   │ Concentration   │ Amount to Add   │
+    ╞═════════════════╪═════════════════╪═════════════════╡
+    │ NaCl            │ 50mM            │ 14.61g          │
+    ├─────────────────┼─────────────────┼─────────────────┤
+    │ glycerol        │ 10%             │ 500.0mL         │
+    ├─────────────────┼─────────────────┼─────────────────┤
+    │ KCl             │ 5g              │ 5.0g            │
+    ╘═════════════════╧═════════════════╧═════════════════╛
 
 Learning More
 +++++++++++++

@@ -12,7 +12,7 @@ A Note on Concentrations
 ------------------------
 Chemical concentrations can be specified in a number of ways. One common method, shown in the example above, is \
 with molarity. Note that before one can specify a chemical's concentration in molar, that chemical's molar mass must \
-first be added to your chemical library (see 'buf help chemical' for more information). Alternatively, one can specify \
+first be added to your chemical library (see :doc:`buf chemical <chemical>`). Alternatively, one can specify \
 a concentration of a chemical to be a percentage of the total volume of solution, shown above with '10% glycerol'. Lastly, \
 if you want a constant mass or volume of a chemical to be added to the solution, no matter its volume, you can specify that \
 constant amount in the recipe (e.g. '10g KCl'). When using these non-molar concentration, the chemical being listed does not \
