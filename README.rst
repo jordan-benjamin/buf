@@ -5,11 +5,11 @@ Project Description
 Welcome to buf!
 ***************
 Buf is a command line based toolkit for making chemical buffers/solutions. Tired of calculating \
-how much of each chemical you need to weight out when making solutions? Buf can help. Specifically, buf:
+how much of each chemical you need to add when making solutions? Buf can help. Specifically, buf:
 
 #. Allows you to develop a chemical library, saving the molar masses of frequently used chemicals.
 #. Allows you to use those chemicals to define recipes for your buffers/solutions, in which you specify the concentration of each ingredient required to make the buffer.
-#. Will 'make' those recipes for you, calculating how much of each ingredient you require to produce the volume of buffer you specify.
+#. Will 'make' those recipes for you, calculating how much of each ingredient you require to produce the volume of solution you specify.
 
 Installation
 ************
@@ -48,6 +48,7 @@ For specific information about a subcommand, see ``buf help <subcommand_name>``.
 Version History
 ***************
 
+- 1.0.0: Creation of documentation on Read the Docs! Repository commented and published on GitHub.
 - 1.0.0a11: Fixing README format.
 - 1.0.0a10: Deleting old buf/library directory (since library files are now stored outside the package), \
   updating README to describe new changes.
