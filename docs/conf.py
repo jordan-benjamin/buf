@@ -153,6 +153,6 @@ texinfo_documents = [
      'Science'),
 ]
 
-html_sidebars = { '**': ['globaltoc.html', 'relations.html', 'sourcelink.html'] }
+html_sidebars = { '**': ['globaltoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html'] }
 
 
