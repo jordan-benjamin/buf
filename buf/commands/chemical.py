@@ -7,7 +7,7 @@
 
 import os
 import tabulate
-from buf import user_input, error_messages
+from buf import user_input, error_messages, libraries
 from typing import Sequence
 
 instructions = """buf chemical:
@@ -17,8 +17,9 @@ list of chemicals and their molar masses.
 
 Before making buffers that specify a chemical's concentration in molar, that chemical's molar \
 mass must first be added to your chemical library. To do this, use 'buf -a <molar_mass> <chemical_names>...', where \
-the chemical's molar mass is in g/mol. For example, after adding NaCl to your library with 'buf add -a 58.44 NaCl', \
-you can then 'buf make 2L 1M NaCl', specifying the concentration of NaCl in molar.
+the chemical's molar mass is in g/mol. For example, after adding NaCl to your library with ``buf add -a 58.44 NaCl``, \
+you can then ``buf make 2L 1M NaCl`` to calculate the mass of salt you would need to add to a 2L solution to raise the \
+salt concentration to 1M (see 'buf help make' for more information on performing solution calculations).
 
 Chemicals can have multiple names, which can be listed upon addition to your library. For example, using \
 'buf chemical -a 58.44 NaCl salt' allows you use either the name 'salt' or 'NaCl' when making buffers (i.e. 'buf make 2L 1M NaCl' \
@@ -26,8 +27,9 @@ is equivalent to 'buf make 2L 1M salt', since both expressions refer to the same
 
 To add additional names to an existing entry in your chemical library (also known as 'nicknaming' the chemical), use \
 'buf chemical -n <existing_chemical_name> <nicknames>...'. For example, if you added NaCl to your library with 'buf chemical \
- -a 58.44 NaCl', and then nicknamed the chemical with 'buf chemical -n NaCl salt table_salt', you could use any of 'NaCl', 'salt', \
- or 'table_salt' to refer to the same molar mass.
+-a 58.44 NaCl', and then nicknamed the chemical with 'buf chemical -n NaCl salt table_salt', you could use any of 'NaCl', 'salt', \
+or 'table_salt' to refer to the same molar mass. Note that using 'buf chemical -a 58.44 NaCl table_salt salt' is equivalent to using \
+'buf chemical -a 58.44 NaCl' followed by 'buf chemical -n NaCl table_salt salt'. 
  
 Another way to add chemicals to your library is by specifying a list of them in a text file. This file should contain one chemical \
 per line, where the first word on each line specifies the chemical's molar mass, followed by the list of the chemical's names. Spaces should \
@@ -42,7 +44,7 @@ Using 'buf chemical -a chemicals.txt' would add these three chemicals to your li
 To delete a chemical, use 'buf chemical -d <chemical_name>'. By default, chemical deletion is shallow/incomplete; the same chemical \
 can still be accessed through its other names after one name has been deleted. For example, if 'buf chemical -a 58.44 NaCl salt' was used to \
 add a chemical to our library, and then the name 'NaCl' was deleted with 'buf chemical -d NaCl', the name 'salt' would still be bound to a molar mass
-of 58.44 in your chemical library. To delete a chemical entirely (i.e. delete all its names), use the '--complete' option. Using the example \
+of 58.44 g/mol in your chemical library. To delete a chemical entirely (i.e. delete all its names), use the '--complete' option. Using the example \
 above, 'buf chemical -d NaCl --complete' would remove both the names 'NaCl' and 'salt' from our chemical library. To skip the program \
 asking you to confirm your decision, use the '--confirm' option.
 
@@ -50,7 +52,7 @@ To view information about a specific chemical (its molar mass and additional nam
 chemical library, use 'buf chemical'.
 """
 
-chemical_library_file = os.path.join(os.path.dirname(__file__), "../library/chemicals.txt")
+chemical_library_file = libraries.fetch_library_file_path("chemicals.txt")
 
 def chemical(options : dict):
     """Parses dictionary of command line options and calls appropriate functions."""
@@ -115,7 +117,7 @@ def make_safe_chemical(molar_mass : str, names : list, chemical_library: dict = 
 # --------------------------------ADDING CHEMICALS--------------------------------
 # --------------------------------------------------------------------------------
 
-def add_single_chemical(molar_mass: str, names: Sequence[str]):
+def add_single_chemical(molar_mass: str, names: Sequence[str]):    
     """Adds single chemical to library."""
     new_chemical = make_safe_chemical(molar_mass, names)
     with open(chemical_library_file, "a") as file:
@@ -150,7 +152,7 @@ def add_chemicals_from_file(filename : str):
             if len(words) == 0:
                 continue
             elif len(words) < 2:
-                error_messages.invalid_line_in_chemical_file(line_number)
+                error_messages.line_too_short_in_chemical_file(line_number)
 
             molar_mass = words[0]
             names = words[1:]
@@ -165,7 +167,7 @@ def add_chemicals_from_file(filename : str):
             new_chemical_objects.append(new_chemical)
 
         except:
-            error_messages.add_from_file_termination(line_number, upper_case_data_type="Chemicals")
+            error_messages.add_from_file_termination(line_number, erroneous_line=line.strip("\n"), upper_case_data_type="Chemicals")
 
     with open(chemical_library_file, "a") as file:
         for new_chemical in new_chemical_objects:
@@ -187,6 +189,8 @@ def nickname_chemical(existing_chemical_name: str, new_names: Sequence[str]):
     for new_name in new_names:
         if new_name in chemical_library:
             error_messages.chemical_already_exists(new_name)
+        if " " in new_name:
+            error_messages.spaces_in_chemical_name(new_name)
 
     chemical_object = chemical_library[existing_chemical_name]
 
@@ -302,7 +306,7 @@ def display_chemical_library():
     for chemical_name, chemical_object in chemical_library.items():
         table.append((chemical_name, chemical_object.molar_mass))
 
-    # Key is the chemical's name (the first item in each tuple in the list)
-    table.sort(key=lambda entry: entry[0])
+    # Sorting by the chemical name, upper() is called so that all the upper case names don't precede all the lowercase ones.
+    table.sort(key=lambda entry: entry[0].upper())
 
-    print(tabulate.tabulate(table, headers=["Chemical Name", "Molar Mass"], tablefmt="fancy_grid"))
+    print(tabulate.tabulate(table, headers=["Chemical Name", "Molar Mass (g/mol)"], tablefmt="fancy_grid"))

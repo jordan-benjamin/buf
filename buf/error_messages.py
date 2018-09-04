@@ -31,8 +31,8 @@ def non_positive_molar_mass(molar_mass: float):
     print("Invalid molar mass: '" + str(molar_mass) + "' must be greater than 0.")
     exit()
 
-def line_too_short_in_chemical_file(line_number: float):
-    print("Invalid line length: line" + str(line_number) + " must contain at least one name after its molar mass. For "
+def line_too_short_in_chemical_file(line_number_zero_indexed: float):
+    print("Invalid line length: line " + str(line_number_zero_indexed + 1) + " must contain at least one name after its molar mass. For "
           "more information, see 'buf help chemical'.")
     exit()
 
@@ -68,13 +68,13 @@ def non_positive_concentration_magnitude(magnitude: str):
     print("Invalid concentration: '" + str(magnitude) + "' is not greater than 0.")
     exit()
 
-def line_too_short_in_recipe_file(line_number: float):
-    print("Invalid line length: line " + str(line_number) + " must contain at least one concentration-chemical name pair.",
+def line_too_short_in_recipe_file(line_number_zero_indexed: float):
+    print("Invalid line length: line " + str(line_number_zero_indexed + 1) + " must contain at least one concentration-chemical name pair.",
           "For more information see 'buf help recipe'.")
     exit()
 
-def line_has_inequal_contents_in_recipe_file(line_number: float):
-    print("Invalid line length: line " + str(line_number) + " contains an inequal number of concentrations and chemical names.")
+def line_has_inequal_contents_in_recipe_file(line_number_zero_indexed: float):
+    print("Invalid line length: line " + str(line_number_zero_indexed + 1) + " contains an inequal number of concentrations and chemical names.")
     exit()
 
 def spaces_in_recipe_name(recipe_name: str):
@@ -86,7 +86,7 @@ def spaces_in_recipe_name(recipe_name: str):
 # --------------------------------------------------------------------------------
 
 def invalid_buffer_volume_unit(symbol: str):
-    print("Invalid volume unit: '" + str(symbol) + "' is not a unit of volume.")
+    print("Invalid volume unit: '" + str(symbol) + "' is not a valid unit of volume. Valid units are:", *unit.volume_units.get_symbols())
     exit()
 
 def non_number_buffer_volume_magnitude(magnitude: str):
@@ -147,6 +147,7 @@ def library_load_error(lower_case_library_name: str):
     exit()
 
 # Data type refers to chemicals or recipes.
-def add_from_file_termination(line_number_zero_indexed: str, upper_case_data_type: str):
-    print("Error encountered on line " + str(line_number_zero_indexed + 1) + ". " + str(upper_case_data_type) + " specified in file not added to library.")
+def add_from_file_termination(line_number_zero_indexed: str, erroneous_line: str, upper_case_data_type: str):
+    print("Error encountered on line " + str(line_number_zero_indexed + 1) + ": '" + str(erroneous_line) + "'. " + str(upper_case_data_type) +
+          " specified in file not added to library.")
     exit()
