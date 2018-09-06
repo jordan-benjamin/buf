@@ -10,7 +10,7 @@ Welcome to Buf!
 Project Description
 -------------------
 Buf is a command line based toolkit for making chemical buffers/solutions. Tired of calculating \
-how much of each chemical you need to weight out when making solutions? Buf can help. Specifically, buf:
+how much of each chemical you need to add when making solutions? Buf can help. Specifically, buf:
 
 #. Allows you to develop a chemical library, saving the molar masses of frequently used chemicals.
 #. Allows you to use those chemicals to define recipes for your buffers/solutions, in which you specify \
