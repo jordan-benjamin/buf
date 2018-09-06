@@ -16,7 +16,7 @@ setup(name='buf',
         "Operating System :: OS Independent"
       ],
       keywords='buf chemistry buffer solution salt',
-      url = "https://github.com/jordan-benjamin/buf.git",
+      url = "https://buf.readthedocs.io/en/latest/index.html",
       author='Jordan Juravsky',
       author_email='jordan@mindcharger.com',
       packages=find_packages(),

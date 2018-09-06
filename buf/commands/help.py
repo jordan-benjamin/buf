@@ -16,6 +16,8 @@ This subcommand provides docs/usage instruction for all buf subcommands.
 To access the docs for a specific subcommand, use 'buf help <subcommand_name>'.
 
 For a general overview of the program, use 'buf help'.
+
+Buf's documentation can also be accessed at https://buf.readthedocs.io/en/latest/index.html.
 """
 
 general_help_docstring = """
@@ -58,7 +60,8 @@ buf make:
     Define a recipe as you make it: 'buf make <volume> (<concentration> <chemical_name>)...'. Ex. 'buf make 2M KCl 10% glycerol'.
 
 
-For details and more example usages regarding a specific subcommand, use 'buf help <subcommand_name>'. Ex. 'buf help chemical'.
+For details and more example usages regarding a specific subcommand, use 'buf help <subcommand_name>'. Ex. 'buf help chemical'. \
+Documentation can also be accessed at https://buf.readthedocs.io/en/latest/index.html.
 """
 
 def help(options):

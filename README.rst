@@ -11,6 +11,8 @@ how much of each chemical you need to add when making solutions? Buf can help. S
 #. Allows you to use those chemicals to define recipes for your buffers/solutions, in which you specify the concentration of each ingredient required to make the buffer.
 #. Will 'make' those recipes for you, calculating how much of each ingredient you require to produce the volume of solution you specify.
 
+For more information, visit buf's `homepage <https://buf.readthedocs.io/en/latest/index.html>`_.
+
 Installation
 ************
 To install the buf toolkit, simply use ``pip install buf``.
@@ -43,7 +45,9 @@ will use our stored chemical and recipe libraries to calculate the required amou
 Learning More
 *************
 This tutorial only provides a brief overview of buf; for more details about the toolkit's usage and functionality, see ``buf help``. \
-For specific information about a subcommand, see ``buf help <subcommand_name>``. Happy buffer making!
+For specific information about a subcommand, see ``buf help <subcommand_name>``. Alternatively, visit buf's online \
+documentation on Read the Docs `here <https://buf.readthedocs.io/en/latest/index.html>`_. You can also access the toolkit's \
+GitHub repository `here <https://github.com/jordan-benjamin/buf>`_. Happy buffer making!
 
 Version History
 ***************
